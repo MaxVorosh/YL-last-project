@@ -23,7 +23,7 @@ app.config["SECRET_KEY"] = my_hash(hash_string)
 @app.route("/")
 @app.route("/index")
 def index():
-    return render_template("general.html")
+    return render_template("index.html")
 
 
 if __name__ == "__main__":
