@@ -24,6 +24,12 @@ login_manager = LoginManager()
 login_manager.init_app(app)
 
 
+@app.route("/account")
+def account():
+    session = db_session.create_session()
+    return render_template("account.html", current_user=current_user)
+
+
 @login_manager.user_loader
 def load_user(user_id):
     session = db_session.create_session()

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Аккаунт пользователя</h1>
+<h3>{{ current_user.surname }} {{ current_user.name }}</h3>
+<h3>Данные пользователя: </h3>
+<div class="form-group">
+    <label>Имя пользователя: </label>
+    <p>{{ current_user.name }}</p>
+</div>
+<div class="form-group">
+    <label>Фамилия пользователя: </label>
+    <p>{{ current_user.surname }}</p>
+</div>
+<div class="form-group">
+    <label>Email пользователя: </label>
+    <p>{{ current_user.email }}</p>
+</div>
+<div class="form-group">
+    <label>Счёт:</label>
+    <p>{{ current_user.money }} руб.</p>
+</div>
+<div style="position: absolute; right: 0px; top: 0px;">
+    {{ current_user.photo }}
+</div>
+{% endblock %}

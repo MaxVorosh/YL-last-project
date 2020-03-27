@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, Float
 from sqlalchemy_serializer import SerializerMixin
 from .db_session import SqlAlchemyBase
 from flask_login import UserMixin
@@ -17,3 +17,4 @@ class User(UserMixin, SqlAlchemyBase, SerializerMixin):
     role = Column(String, default="user")
     email = Column(String, unique=True)
     password = Column(String)
+    money = Column(Float, default=0.00)
