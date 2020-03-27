@@ -15,3 +15,5 @@ class User(UserMixin, SqlAlchemyBase, SerializerMixin):
     auctions = Column(String, nullable=True)
     registration_date = Column(DateTime, default=datetime.datetime.now)
     is_administrator = Column(Boolean, default=False)
+    email = Column(String, unique=True)
+    password = Column(String)
