@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Регистрация</h1>
+{% if message != "" %}
+    <div class="alert alert-danger" role="alert">
+      {{ message }}
+    </div>
+{% endif %}
+<form method="post">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        <label for="name">{{ form.name.label }}</label>
+        {{ form.name(class="form-control", id="name") }}
+    </div>
+    <div class="form-group">
+        <label for="surname">{{ form.surname.label }}</label>
+        {{ form.surname(class="form-control", id="surname") }}
+    </div>
+    <div class="form-group">
+        <label for="email">{{ form.login.label }}</label>
+        {{ form.login(class="form-control", id="email") }}
+    </div>
+    <div class="form-group">
+        <label for="password">{{ form.password.label }}</label>
+        {{ form.password(class="form-control", id="password", type="password") }}
+    </div>
+    <div class="form-group">
+        <label for="confirm-password"> {{ form.confirm_password.label }}</label>
+        {{ form.confirm_password(class="form-control", id="confirm-password", type="password") }}
+    </div>
+    {{ form.submit(class="btn btn-warning") }}
+</form>
+{% endblock %}
