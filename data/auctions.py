@@ -10,3 +10,4 @@ class Auction(SqlAlchemyBase, SerializerMixin):
     participants = Column(String)
     history = Column(Text, nullable=True)
     winner = Column(Integer, ForeignKey("users.id"), nullable=True)
+    deal = Column(Integer, ForeignKey("deals.id"), nullable=True)
