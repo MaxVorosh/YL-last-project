@@ -23,13 +23,14 @@
                     <a href="/register" class="nav-link"><font size="5">Регистрация</font></a>
                     <a href="/login" class="nav-link"><font size="5">Вход</font></a>
                 {% else %}
+                    <a href="/account" class="nav-link"><font size="5">{{ current_user.surname }} {{ current_user.name }}</font></a>
                     <a href="/logout" class="nav-link"><font size="5">Выйти</font></a>
                 {% endif %}
             </div>
         </div>
     </nav>
 </header>
-<main role="main" class="content">
+<main role="main" class="content" style="position: relative">
     {% block content %}{% endblock %}
 </main>
 </body>
