@@ -1,6 +1,6 @@
-from data import db_session, users
-from data.forms import RegistrationForm, LoginForm
-from flask_login import login_user, logout_user, current_user, LoginManager
+from data import db_session, Users, Products
+from data.forms import RegistrationForm, LoginForm, AddProductForm
+from flask_login import login_user, logout_user, current_user, LoginManager, login_required
 from flask import Flask, render_template, redirect
 from random import choice, randint
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -19,7 +19,8 @@ def my_hash(s):
 
 
 app = Flask(__name__)
-app.config["SECRET_KEY"] = "zwsxdcfvgbhnjmksdfghjkl"
+f = open('Config.txt')
+app.config["SECRET_KEY"] = str(my_hash(f.readline()))
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -27,7 +28,7 @@ login_manager.init_app(app)
 @login_manager.user_loader
 def load_user(user_id):
     session = db_session.create_session()
-    return session.query(users.User).get(user_id)
+    return session.query(Users.User).get(user_id)
 
 
 @app.route("/")
@@ -41,9 +42,10 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         session = db_session.create_session()
-        user = session.query(users.User).filter(users.User.email == form.login.data).first()
+        user = session.query(Users.User).filter(Users.User.email == form.login.data).first()
         if user is None:
-            return render_template("login.html", current_user=current_user, form=form, message="Пользователя с подобной почтой не существует.")
+            return render_template("login.html", current_user=current_user, form=form,
+                                   message="Пользователя с подобной почтой не существует.")
         if check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
             return redirect("/")
@@ -62,11 +64,13 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         session = db_session.create_session()
-        if session.query(users.User).filter(users.User.email == form.login.data).first() is not None:
-            return render_template("register.html", message="Подобный email уже используется.", current_user=current_user, form=form)
+        if session.query(Users.User).filter(Users.User.email == form.login.data).first() is not None:
+            return render_template("register.html", message="Подобный email уже используется.",
+                                   current_user=current_user, form=form)
         if form.password.data != form.confirm_password.data:
-            return render_template("register.html", message="Пароли не совпадают.", current_user=current_user, form=form)
-        user = users.User(
+            return render_template("register.html", message="Пароли не совпадают.", current_user=current_user,
+                                   form=form)
+        user = Users.User(
             email=form.login.data,
             password=generate_password_hash(form.password.data),
             name=form.name.data,
@@ -77,6 +81,35 @@ def register():
         login_user(user)
         return redirect("/")
     return render_template("register.html", message="", current_user=current_user, form=form)
+
+
+@app.route("/AddProduct", methods=["GET", "POST"])
+@login_required
+def AddProduct():
+    # TODO сделать дизайн и переход на эту страницу с других
+    form = AddProductForm()
+    if form.validate_on_submit():
+        session = db_session.create_session()
+        photo = form.photo.data
+        product = Products.Product(
+            title=form.title.data,
+            description=form.description.data,
+            owner=current_user.id,
+        )
+        session.add(product)
+        session.commit()
+        id = session.query(Products.Product).all()
+        id = map(lambda x: x.id, id)
+        id = str(max(id))
+        photo.save(f"static/image/products/{max(id)}.jpg")
+        user = session.query(Users.User).filter(current_user.id == Users.User.id).first()
+        if user.products:
+            user.products += '; ' + id
+        else:
+            user.products += id
+        session.commit()
+        return redirect("/")
+    return render_template("AddProduct.html", message="", current_user=current_user, form=form)
 
 
 if __name__ == "__main__":

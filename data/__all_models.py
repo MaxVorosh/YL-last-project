@@ -1,1 +1,1 @@
-from . import users, deals, products, auctions
+from . import Users, Deals, Products, Auctions

@@ -10,7 +10,7 @@ class User(UserMixin, SqlAlchemyBase, SerializerMixin):
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String)
     surname = Column(String)
-    products = Column(String, nullable=True)
+    products = Column(String, nullable=True, default='')
     deals = Column(String, nullable=True)
     auctions = Column(String, nullable=True)
     registration_date = Column(DateTime, default=datetime.datetime.now)
