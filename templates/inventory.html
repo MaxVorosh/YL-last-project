@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% for tup in inventory %}
+        {% set path = tup[0] %}
+        {% set obj = tup[1] %}
+        <h3>{{obj.title}}</h3>
+        <h6>{{obj.description}}</h6>
+        <img src={{path}} alt="здесь должна была быть картинка, но не нашлась">
+        <br>
+    {% endfor %}
+{% endblock %}

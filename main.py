@@ -107,7 +107,7 @@ def AddProduct():
         id = session.query(Products.Product).all()
         id = map(lambda x: x.id, id)
         id = str(max(id))
-        photo.save(f"static/image/products/{max(id)}.jpg")
+        photo.save(f"static/image/products/{id}.jpg")
         user = session.query(Users.User).filter(current_user.id == Users.User.id).first()
         if user.products:
             user.products += '; ' + id
@@ -116,6 +116,17 @@ def AddProduct():
         session.commit()
         return redirect("/")
     return render_template("AddProduct.html", message="", current_user=current_user, form=form)
+
+
+@app.route("/Inventory")
+@login_required
+def Inventory():
+    session = db_session.create_session()
+    inventory = session.query(Products.Product).filter(Products.Product.owner == current_user.id)
+    inventory = list(map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), inventory))
+    # print(inventory[0][0])
+    # im = open(inventory[0][0])
+    return render_template('inventory.html', current_user=current_user, inventory=inventory)
 
 
 if __name__ == "__main__":
