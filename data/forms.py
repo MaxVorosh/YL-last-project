@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import PasswordField, StringField, BooleanField, SubmitField, FileField
 from wtforms.validators import DataRequired
+from flask_wtf.file import FileRequired, FileAllowed
 
 
 class LoginForm(FlaskForm):
@@ -17,4 +18,14 @@ class RegistrationForm(FlaskForm):
     name = StringField("Имя", validators=[DataRequired()])
     surname = StringField("Фамилия", validators=[DataRequired()])
     photo = FileField("Фотография")
+    submit = SubmitField("Зарегестрироваться")
+
+
+class AddProductForm(FlaskForm):
+    title = StringField("Название", validators=[DataRequired()])
+    description = StringField("Описание", validators=[DataRequired()])
+    photo = FileField("Изображение",
+                      validators=[FileRequired(),
+                                  FileAllowed(['jpg', 'png', 'jpeg'],
+                                              "Файл должен быть одного из этих форматов: 'jpg', 'png', 'jpeg'")])
     submit = SubmitField("Зарегестрироваться")
