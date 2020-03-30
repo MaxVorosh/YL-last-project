@@ -72,11 +72,9 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         session = db_session.create_session()
-        # if form.photo.data:
-        # 	print("test")
-        filename = form.photo.data.filename
-        print(filename)
-        form.photo.data.save("static/image/users/" + form.login.data + "." + filename.split(".")[-1])
+        if form.photo.data:
+        	filename = form.photo.data.filename
+        	form.photo.data.save("static/image/users/" + form.login.data + "." + filename.split(".")[-1])
         if session.query(Users.User).filter(Users.User.email == form.login.data).first() is not None:
             return render_template("register.html", message="Подобный email уже используется.",
                                    current_user=current_user, form=form)
@@ -88,6 +86,7 @@ def register():
             password=generate_password_hash(form.password.data),
             name=form.name.data,
             surname=form.surname.data,
+            photo=True if form.photo.data else False
         )
         session.add(user)
         session.commit()

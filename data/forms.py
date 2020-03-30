@@ -18,8 +18,7 @@ class RegistrationForm(FlaskForm):
     name = StringField("Имя", validators=[DataRequired()])
     surname = StringField("Фамилия", validators=[DataRequired()])
     photo = FileField("Фотография",
-                      validators=[FileRequired(),
-                                  FileAllowed(['jpg', 'png', 'jpeg'],
+                      validators=[FileAllowed(['jpg', 'png', 'jpeg'],
                                               "Файл должен быть одного из этих форматов: 'jpg', 'png', 'jpeg'")])
     submit = SubmitField("Зарегестрироваться")
 
