@@ -19,7 +19,9 @@
     <label>Счёт:</label>
     <p>{{ current_user.money }} руб.</p>
 </div>
-<div style="position: absolute; right: 0px; top: 0px;">
-    {{ current_user.photo }}
-</div>
+{% if current_user.photo != "" %}
+	<div style="position: absolute; right: 0px; top: 0px;">
+    	<img src="static/image/users/{{ current_user.email }}.{{ current_user.photo }}" width="50%" height="50%">
+	</div>
+{% endif %}
 {% endblock %}

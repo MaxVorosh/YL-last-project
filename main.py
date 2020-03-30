@@ -86,7 +86,7 @@ def register():
             password=generate_password_hash(form.password.data),
             name=form.name.data,
             surname=form.surname.data,
-            photo=True if form.photo.data else False
+            photo=form.photo.data.filename.split(".")[-1] if form.photo.data else ""
         )
         session.add(user)
         session.commit()

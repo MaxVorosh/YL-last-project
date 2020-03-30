@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Float
+from sqlalchemy import Column, Integer, String, DateTime, Float, Boolean
 from sqlalchemy_serializer import SerializerMixin
 from .db_session import SqlAlchemyBase
 from flask_login import UserMixin
@@ -18,4 +18,4 @@ class User(UserMixin, SqlAlchemyBase, SerializerMixin):
     email = Column(String, unique=True)
     password = Column(String)
     money = Column(Float, default=0.00)
-    photo = Column(String, default="static/image/users/nothing.jpg", nullable=True)
+    photo = Column(String)
