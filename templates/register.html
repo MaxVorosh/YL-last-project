@@ -2,11 +2,11 @@
 {% block content %}
 <h1>Регистрация</h1>
 {% if message != "" %}
-    <div class="alert alert-danger" role="alert" enctype = "multipart/form-data">
+    <div class="alert alert-danger" role="alert">
       {{ message }}
     </div>
 {% endif %}
-<form method="post">
+<form method="post" novalidate enctype = "multipart/form-data">
     {{ form.hidden_tag() }}
     <div class="form-group">
         <label for="name">{{ form.name.label }}</label>

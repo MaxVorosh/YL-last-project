@@ -131,8 +131,6 @@ def Inventory():
     session = db_session.create_session()
     inventory = session.query(Products.Product).filter(Products.Product.owner == current_user.id)
     inventory = list(map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), inventory))
-    # print(inventory[0][0])
-    # im = open(inventory[0][0])
     return render_template('inventory.html', current_user=current_user, inventory=inventory)
 
 
