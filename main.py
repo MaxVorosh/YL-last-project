@@ -1,9 +1,10 @@
 from data import db_session, Users, Products
 from data.forms import RegistrationForm, LoginForm, AddProductForm
 from flask_login import login_user, logout_user, current_user, LoginManager, login_required
-from flask import Flask, render_template, redirect
+from flask import Flask, render_template, redirect, request
 from random import choice, randint
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 
 
 def my_hash(s):
@@ -21,6 +22,7 @@ def my_hash(s):
 app = Flask(__name__)
 f = open('Config.txt')
 app.config["SECRET_KEY"] = str(my_hash(f.readline()))
+app.config["UPLOAD_FOLDER"] = "static/image/users"
 login_manager = LoginManager()
 login_manager.init_app(app)
 
@@ -70,6 +72,11 @@ def register():
     form = RegistrationForm()
     if form.validate_on_submit():
         session = db_session.create_session()
+        # if form.photo.data:
+        # 	print("test")
+        filename = form.photo.data.filename
+        print(filename)
+        form.photo.data.save("static/image/users/" + form.login.data + "." + filename.split(".")[-1])
         if session.query(Users.User).filter(Users.User.email == form.login.data).first() is not None:
             return render_template("register.html", message="Подобный email уже используется.",
                                    current_user=current_user, form=form)
@@ -89,7 +96,7 @@ def register():
     return render_template("register.html", message="", current_user=current_user, form=form)
 
 
-@app.route("/AddProduct", methods=["GET", "POST"])
+@app.route("/add_product", methods=["GET", "POST"])
 @login_required
 def AddProduct():
     # TODO сделать дизайн и переход на эту страницу с других
@@ -118,7 +125,7 @@ def AddProduct():
     return render_template("AddProduct.html", message="", current_user=current_user, form=form)
 
 
-@app.route("/Inventory")
+@app.route("/inventory")
 @login_required
 def Inventory():
     session = db_session.create_session()

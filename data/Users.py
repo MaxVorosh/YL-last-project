@@ -18,3 +18,4 @@ class User(UserMixin, SqlAlchemyBase, SerializerMixin):
     email = Column(String, unique=True)
     password = Column(String)
     money = Column(Float, default=0.00)
+    photo = Column(String, default="static/image/users/nothing.jpg", nullable=True)
