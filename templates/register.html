@@ -6,7 +6,7 @@
       {{ message }}
     </div>
 {% endif %}
-<form method="post" action="" enctype = "multipart/form-data">
+<form method="post" novalidate enctype = "multipart/form-data">
     {{ form.hidden_tag() }}
     <div class="form-group">
         <label for="name">{{ form.name.label }}</label>
