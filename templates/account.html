@@ -24,4 +24,19 @@
     	<img src="static/image/users/{{ current_user.email }}.{{ current_user.photo }}" width="50%" height="50%">
 	</div>
 {% endif %}
+<h2>Предметы</h2>
+{% if current_user.products == "" %}
+<h3>Товаров нет</h3>
+{% else %}
+{% for item in current_user.products.split(";") %}
+    <div class="card" style="width: 30px;">
+        <img src="static/products/{{ session.query.(type(item)).filter(type(item).id == item.id).first() }}" class="card-img-top">
+        <div class="card-body">
+            <h5 class="card-title">{{ item.title }}</h5>
+            <p class="card-text">{{ item.text }}</p>
+            <a href="#" class="btn btn-warning">Страница товара</a>
+        </div>
+    </div>
+{% endfor %}
+{% endif %}
 {% endblock %}
