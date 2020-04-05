@@ -30,16 +30,18 @@
 <a href="/add_product" class="btn btn-warning">Добавить товар</a><br/>
 {% else %}
 <a href="/add_product" class="btn btn-warning">Добавить товар</a><br/><br/><br/>
+<div class="card-columns">
 {% for item in current_user.products.split(";") %}
 {% set item = session.query(Product).filter(Product.id == item).first() %}
-    <p><div class="card" style="width: 18rem; background-color: rgba(255, 204, 0, 0.5)">
+    <div class="card" style="width: 18rem; background-color: rgba(255, 204, 0, 0.5)">
         <img src="static/image/products/{{ item.id }}.jpg" class="card-img-top">
         <div class="card-body">
             <h5 class="card-title">{{ item.title }}</h5>
             <p class="card-text">{{ item.text }}</p>
             <a href="#" class="btn btn-light">Страница товара</a>
         </div>
-    </div></p>
+    </div>
 {% endfor %}
+</div>
 {% endif %}
 {% endblock %}

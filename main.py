@@ -120,7 +120,7 @@ def AddProduct():
         else:
             user.products += id
         session.commit()
-        return redirect("/")
+        return redirect("/account")
     return render_template("AddProduct.html", message="", current_user=current_user, form=form)
 
 
