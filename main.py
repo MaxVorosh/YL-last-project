@@ -30,7 +30,7 @@ login_manager.init_app(app)
 @app.route("/account")
 def account():
     session = db_session.create_session()
-    return render_template("account.html", current_user=current_user, session=session)
+    return render_template("account.html", current_user=current_user, session=session, Product=Products.Product)
 
 
 @login_manager.user_loader
