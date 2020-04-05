@@ -1,5 +1,5 @@
-from data import db_session, Users, Products
-from data.forms import RegistrationForm, LoginForm, AddProductForm
+from data import db_session, Users, Products, Auctions
+from data.forms import RegistrationForm, LoginForm, AddProductForm, AuctionForm
 from flask_login import login_user, logout_user, current_user, LoginManager, login_required
 from flask import Flask, render_template, redirect, request
 from random import choice, randint
@@ -73,8 +73,8 @@ def register():
     if form.validate_on_submit():
         session = db_session.create_session()
         if form.photo.data:
-        	filename = form.photo.data.filename
-        	form.photo.data.save("static/image/users/" + form.login.data + "." + filename.split(".")[-1])
+            filename = form.photo.data.filename
+            form.photo.data.save("static/image/users/" + form.login.data + "." + filename.split(".")[-1])
         if session.query(Users.User).filter(Users.User.email == form.login.data).first() is not None:
             return render_template("register.html", message="Подобный email уже используется.",
                                    current_user=current_user, form=form)
@@ -131,6 +131,30 @@ def Inventory():
     inventory = session.query(Products.Product).filter(Products.Product.owner == current_user.id)
     inventory = list(map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), inventory))
     return render_template('inventory.html', current_user=current_user, inventory=inventory)
+
+
+@app.route("/new_auction", methods=["GET", "POST"])
+@login_required
+def new_auction():
+    form = AuctionForm()
+    if form.search.data and form.product.data:
+        session = db_session.create_session()
+        good = session.query(Products.Product).filter(Products.Product.title == form.product.data)
+        inventory = list(map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), good))
+        return render_template("AddAuction.html", message='', current_user=current_user, form=form,
+                               inventory=inventory)
+    if form.submit.data and form.product.data and form.number.data:
+        session = db_session.create_session()
+        good = session.query(Products.Product).filter(Products.Product.title == form.product.data)
+        try:
+            auction = Auctions.Auction(product=good[form.number.data - 1].id, participants='')
+            session.add(auction)
+            session.commit()
+            return redirect("/")
+        except:
+            return render_template("AddAuction.html", message='Введите действительный номер', current_user=current_user,
+                                   form=form, inventory=[])
+    return render_template("AddAuction.html", message='', current_user=current_user, form=form, inventory=[])
 
 
 if __name__ == "__main__":

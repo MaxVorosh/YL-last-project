@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if message != "" %}
+        <div class="alert alert-danger" role="alert">
+            {{ message }}
+        </div>
+    {% endif %}
+    <form action="" method="post" novalidate
+          enctype = "multipart/form-data">
+        <div>
+            {{ form.csrf_token }}
+        </div>
+        {{ form.product.label() }}
+        {{ form.product() }}
+        {% for error in form.product.errors %}
+            <h6>{{ error }}</h6>
+        {% endfor %}
+        {{ form.search() }}
+        <br>
+        {% for tup in inventory %}
+            {% set path = tup[0] %}
+            {% set obj = tup[1] %}
+            <h3>{{obj.title}}</h3>
+            <h6>{{obj.description}}</h6>
+            <img src={{path}} alt="здесь должна была быть картинка, но не нашлась">
+            <br>
+        {% endfor %}
+        {{ form.number.label() }}
+        {{ form.number() }}
+        <br>
+        {% for error in form.number.errors %}
+            <h6>{{ error }}</h6>
+        {% endfor %}
+        {{ form.submit.label() }}
+        {{ form.submit() }}
+    </form>
+{% endblock %}
