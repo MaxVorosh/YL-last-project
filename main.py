@@ -1,4 +1,4 @@
-from data import db_session, Users, Products, Auctions
+from data import db_session, Users, Products, Auctions, Deals
 from data.forms import RegistrationForm, LoginForm, AddProductForm, AuctionForm
 from flask_login import login_user, logout_user, current_user, LoginManager, login_required
 from flask import Flask, render_template, redirect, request
@@ -30,7 +30,7 @@ login_manager.init_app(app)
 @app.route("/account")
 def account():
     session = db_session.create_session()
-    return render_template("account.html", current_user=current_user, session=session, Product=Products.Product)
+    return render_template("account.html", current_user=current_user, session=session, Product=Products.Product, Deal=Deals.Deal)
 
 
 @login_manager.user_loader

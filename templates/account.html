@@ -44,4 +44,29 @@
 {% endfor %}
 </div>
 {% endif %}
+<h2>Сделки</h2>
+{% if current_user.deals == "" %}
+<h3>Нет сделок</h3>
+{% else %}
+<table class="table table-striped">
+	<thead>
+		<th scope="col">№</th>
+		<th scope="col">Product id (global)</th>
+		<th scope="col">Partner</th>
+		<th scope="col">Date and time</th>
+	</thead>
+	<tbody>
+		{% for num, deal in enumerate(current_user.deals.split(";")) %}
+		{% set deal = session.query(Deal).filter(Deal.id == deal).first() %}
+		{% set user = session.query(User).filter(User.id == [i for i in deal.participants.strip(";") if i != current_user.id][0]).first() %}
+		<tr>
+			<th scope="row">{{ num + 1 }}</th>
+			<td>{{ deal.product }}</td>
+			<td>{{ user.name }} {{ user.surname }}</td>
+			<td>{{ deal.date }}</td>
+		</tr>
+	</tbody>
+</table>
+		{% endfor %}
+{% endif %}
 {% endblock %}
