@@ -1,0 +1,7 @@
+{ extends "base.html" }
+{ block content }
+<h1>Страница продукта</h1>
+<h2>{{ product.title }}</h2> <a href="#" class="btn btn-warning">Приобрести товар</a>
+<img src="static/image/products/{{ product.id }}.jpg" width="50%" height="50%">
+<h3>Описание:</h3> <p>{{ product.description }}</p>
+{ endblock }

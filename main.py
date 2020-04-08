@@ -30,7 +30,7 @@ login_manager.init_app(app)
 @app.route("/account")
 def account():
     session = db_session.create_session()
-    return render_template("account.html", current_user=current_user, session=session, Product=Products.Product, Deal=Deals.Deal)
+    return render_template("account.html", current_user=current_user, session=session, Product=Products.Product, Deal=Deals.Deal, User=Users.User, account=current_user)
 
 
 @login_manager.user_loader
@@ -155,6 +155,15 @@ def new_auction():
             return render_template("AddAuction.html", message='Введите действительный номер', current_user=current_user,
                                    form=form, inventory=[])
     return render_template("AddAuction.html", message='', current_user=current_user, form=form, inventory=[])
+
+
+@app.route("/product/<int:id>")
+def product(id):
+	session = db_session.create_session()
+	pr = session.query(Products.Product).filter(Products.Product.id == id).first()
+	if pr is None:
+		return redirect("/")
+	return render_template("product.html", product=pr)
 
 
 if __name__ == "__main__":
