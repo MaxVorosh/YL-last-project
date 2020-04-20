@@ -38,3 +38,10 @@ class AuctionForm(FlaskForm):
     number = IntegerField("Введите порядковый номер объекта из выбранных")
     submit = SubmitField("Создать аукцион")
     search = SubmitField("Поиск")
+
+
+class SearchForm(FlaskForm):
+    product = StringField("Название предмета", validators=[DataRequired()])
+    search = SubmitField("Поиск")
+    number = IntegerField("Введите порядковый номер объекта из выбранных")
+    submit = SubmitField("Перейти к предмету")

@@ -1,5 +1,5 @@
 from data import db_session, Users, Products, Auctions, Deals
-from data.forms import RegistrationForm, LoginForm, AddProductForm, AuctionForm
+from data.forms import RegistrationForm, LoginForm, AddProductForm, AuctionForm, SearchForm
 from flask_login import login_user, logout_user, current_user, LoginManager, login_required
 from flask import Flask, render_template, redirect, request
 from random import choice, randint
@@ -124,6 +124,29 @@ def AddProduct():
     return render_template("AddProduct.html", message="", current_user=current_user, form=form)
 
 
+@app.route("/search", methods=["GET", "POST"])
+@login_required
+def Search():
+    form = SearchForm()
+    session = db_session.create_session()
+    if form.search.data and form.product.data:
+        good = session.query(Products.Product).filter(Products.Product.title == form.product.data)
+        inventory = list(map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), good))
+        return render_template("Search.html", message='', current_user=current_user, form=form,
+                               inventory=inventory)
+    if form.submit.data and form.product.data and form.number.data:
+        session = db_session.create_session()
+        good = session.query(Products.Product).filter(Products.Product.title == form.product.data)
+        try:
+            return redirect(f"/product/{good[form.number.data - 1].id}")
+        except Exception:
+            return render_template("Search.html", message='Введите действительный номер',
+                                   current_user=current_user,
+                                   form=form, inventory=[])
+    return render_template("Search.html", message='', current_user=current_user, form=form, inventory=[])
+
+
+
 @app.route("/inventory")
 @login_required
 def Inventory():
@@ -159,11 +182,11 @@ def new_auction():
 
 @app.route("/product/<int:id>")
 def product(id):
-	session = db_session.create_session()
-	pr = session.query(Products.Product).filter(Products.Product.id == id).first()
-	if pr is None:
-		return redirect("/")
-	return render_template("product.html", product=pr)
+    session = db_session.create_session()
+    pr = session.query(Products.Product).filter(Products.Product.id == id).first()
+    if pr is None:
+        return redirect("/")
+    return render_template("product.html", product=pr)
 
 
 if __name__ == "__main__":
