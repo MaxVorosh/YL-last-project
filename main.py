@@ -28,6 +28,7 @@ login_manager.init_app(app)
 
 
 @app.route("/account")
+@login_required
 def account():
     session = db_session.create_session()
     return render_template("account.html", current_user=current_user, session=session, Product=Products.Product, Deal=Deals.Deal, User=Users.User, account=current_user)
@@ -62,6 +63,7 @@ def login():
 
 
 @app.route("/logout")
+@login_required
 def logout():
     logout_user()
     return redirect("/")

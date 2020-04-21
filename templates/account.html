@@ -34,7 +34,7 @@
 {% for item in current_user.products.split(";") %}
 {% set item = session.query(Product).filter(Product.id == item).first() %}
     <div class="card" style="width: 18rem; background-color: rgba(255, 204, 0, 0.5)">
-        <img src="static/image/products/{{ item.id }}.jpg" class="card-img-top">
+        <img src="/static/image/products/{{ item.id }}.jpg" class="card-img-top">
         <div class="card-body">
             <h5 class="card-title">{{ item.title }}</h5>
             <p class="card-text">{{ item.text }}</p>
