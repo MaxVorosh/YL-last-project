@@ -38,7 +38,7 @@
         <div class="card-body">
             <h5 class="card-title">{{ item.title }}</h5>
             <p class="card-text">{{ item.text }}</p>
-            <a href="#" class="btn btn-light">Страница товара</a>
+            <a href="/product/{{ item.id }}" class="btn btn-light">Страница товара</a>
         </div>
     </div>
 {% endfor %}
