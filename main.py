@@ -43,7 +43,10 @@ def load_user(user_id):
 @app.route("/")
 @app.route("/index")
 def index():
-    return render_template("index.html", current_user=current_user)
+    session = db_session.create_session()
+    products = session.query(Products.Product).all()[::-1][:10]
+    return render_template("index.html", current_user=current_user, session=session,
+                           Product=Products.Product)
 
 
 @app.route("/login", methods=["POST", "GET"])
@@ -189,6 +192,13 @@ def product(id):
     if pr is None:
         return redirect("/")
     return render_template("product.html", product=pr)
+
+
+@app.route("/make_deal/<int:id>")
+@login_required
+def make_deal(id):
+    session = db_session.create_session()
+
 
 
 if __name__ == "__main__":
