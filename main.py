@@ -44,7 +44,10 @@ def load_user(user_id):
 @app.route("/")
 @app.route("/index")
 def index():
-    return render_template("index.html", current_user=current_user)
+    session = db_session.create_session()
+    products = session.query(Products.Product).all()[::-1][:10]
+    return render_template("index.html", current_user=current_user, session=session,
+                           Product=Products.Product)
 
 
 @app.route("/login", methods=["POST", "GET"])
@@ -188,7 +191,27 @@ def product(id):
     pr = session.query(Products.Product).filter(Products.Product.id == id).first()
     if pr is None:
         return redirect("/")
-    return render_template("product.html", product=pr)
+    owner = session.query(Users.User).get(pr.owner)
+    return render_template("product.html", product=pr, owner=owner)
+
+
+@app.route("/account/<int:id>")
+def account_user(id):
+    session = db_session.create_session()
+    user = session.query(Users.User).get(id)
+    if user is None:
+        return redirect("/")
+    if current_user.is_authenticated:
+        if id == current_user.id:
+            return redirect("/account")
+    return render_template("user.html", session=session, user=user, Product=Products.Product)
+
+
+@app.route("/make_deal/<int:id>")
+@login_required
+def make_deal(id):
+    session = db_session.create_session()
+
 
 
 @app.route("/buy/<int:id>", methods=["GET", "POST"])

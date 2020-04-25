@@ -11,4 +11,17 @@
         <a href="#"><button class="btn btn-light">Перейти к поиску</button></a>
     </div>
 </div>
+<h1>Последние товары</h1>
+<div class="card-columns">
+    {% for item in session.query(Product).all()[::-1][:10] %}
+    <div class="card" style="width: 18rem; background-color: rgba(255, 204, 0, 0.5)">
+        <img src="/static/image/products/{{ item.id }}.jpg" class="card-img-top">
+        <div class="card-body">
+            <h5 class="card-title">{{ item.title }}</h5>
+            <p class="card-text">{{ item.text }}</p>
+            <a href="/product/{{ item.id }}" class="btn btn-light">Страница товара</a>
+        </div>
+    </div>
+    {% endfor %}
+</div>
 {% endblock %}
