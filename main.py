@@ -213,7 +213,6 @@ def make_deal(id):
     session = db_session.create_session()
 
 
-
 if __name__ == "__main__":
     db_session.global_init("db/database.sqlite")
     app.run()
