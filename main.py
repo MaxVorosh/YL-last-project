@@ -135,19 +135,18 @@ def AddProduct():
 
 
 @app.route("/search", methods=["GET", "POST"])
-@login_required
 def Search():
     form = SearchForm()
     session = db_session.create_session()
     if form.search.data and form.product.data:
-        good = session.query(Products.Product).filter(Products.Product.title == form.product.data)
+        good = session.query(Products.Product).filter(Products.Product.lower.like(f"%{form.product.data.lower()}%"))
         inventory = list(
             map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), good))
         return render_template("Search.html", message='', current_user=current_user, form=form,
                                inventory=inventory)
     if form.submit.data and form.product.data and form.number.data:
         session = db_session.create_session()
-        good = session.query(Products.Product).filter(Products.Product.title == form.product.data)
+        good = session.query(Products.Product).filter(Products.Product.lower.like(f"%{form.product.data.lower()}%"))
         try:
             return redirect(f"/product/{good[form.number.data - 1].id}")
         except Exception:
