@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import PasswordField, StringField, BooleanField, SubmitField, FileField, IntegerField
+from wtforms import PasswordField, StringField, BooleanField, SubmitField, FileField, IntegerField, TextAreaField
 from wtforms.validators import DataRequired
 from flask_wtf.file import FileRequired, FileAllowed
 
@@ -50,3 +50,8 @@ class SearchForm(FlaskForm):
 class BuyForm(FlaskForm):
     cost = IntegerField("Ваша ставка", validators=[DataRequired()])
     submit = SubmitField("Сделать ставку")
+
+
+class DealForm(FlaskForm):
+    comment = TextAreaField("Комментарий (необязательно)")
+    submit = SubmitField("Отправить запрос")

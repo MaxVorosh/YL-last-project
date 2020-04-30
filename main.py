@@ -1,5 +1,5 @@
 from data import db_session, Users, Products, Auctions, Deals
-from data.forms import RegistrationForm, LoginForm, AddProductForm, AuctionForm, SearchForm, BuyForm
+from data.forms import RegistrationForm, LoginForm, AddProductForm, AuctionForm, SearchForm, BuyForm, DealForm
 from flask_login import login_user, logout_user, current_user, LoginManager, login_required
 from flask import Flask, render_template, redirect, request
 from random import choice, randint
@@ -221,10 +221,16 @@ def account_user(id):
     return render_template("user.html", session=session, user=user, Product=Products.Product)
 
 
-@app.route("/make_deal/<int:id>")
+@app.route("/make_deal/<int:id>", methods=["GET", "POST"])
 @login_required
 def make_deal(id):
     session = db_session.create_session()
+    product = session.query(Products.Product).get(id)
+    owner = session.query(Users.User).get(product.owner)
+    form = DealForm()
+    if form.validate_on_submit():
+        pass
+    return render_template("Deal.html", form=form, product=product, owner=owner, message="")
 
 
 @app.route("/buy/<int:id>", methods=["GET", "POST"])

@@ -39,7 +39,6 @@
         {% for error in form.number.errors %}
             <h6>{{ error }}</h6>
         {% endfor %}
-        {{ form.submit.label() }}
         {{ form.submit(class="btn btn-warning") }}
     </form>
 {% endblock %}

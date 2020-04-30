@@ -3,7 +3,7 @@
 <h1>Страница продукта</h1>
 <h2>{{ product.title }}</h2>
 {% if product.is_sold == 0 %}
-<a href="#" class="btn btn-warning">Приобрести товар</a><br/>
+<a href="/make_deal/{{ product.id }}" class="btn btn-warning">Приобрести товар</a><br/>
 {% else %}
 <h3>Товар продан</h3>
 {% endif %}
