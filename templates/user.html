@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Аккаунт пользователя </h1>
+<h3>{{ user.surname }} {{ user.name }}</h3>
+<h3>Данные пользователя: </h3>
+<div class="form-group">
+    <label>Имя пользователя: </label>
+    <p>{{ user.name }}</p>
+</div>
+<div class="form-group">
+    <label>Фамилия пользователя: </label>
+    <p>{{ user.surname }}</p>
+</div>
+<div class="form-group">
+    <label>Email пользователя: </label>
+    <p>{{ user.email }}</p>
+</div>
+{% if user.photo != "" %}
+	<div style="position: absolute; right: 0px; top: 0px;">
+    	<img src="static/image/users/{{ user.email }}.{{ user.photo }}" width="50%" height="50%">
+	</div>
+{% endif %}
+<h2>Предметы</h2>
+{% if user.products == "" %}
+<h3>Товаров нет</h3>
+{% else %}
+<div class="card-columns">
+{% for item in user.products.split(";") %}
+{% set item = session.query(Product).filter(Product.id == item).first() %}
+    <div class="card" style="width: 18rem; background-color: rgba(255, 204, 0, 0.5)">
+        <img src="/static/image/products/{{ item.id }}.jpg" class="card-img-top">
+        <div class="card-body">
+            <h5 class="card-title">{{ item.title }}</h5>
+            <p class="card-text">{{ item.text }}</p>
+            <a href="/product/{{ item.id }}" class="btn btn-light">Страница товара</a>
+        </div>
+    </div>
+{% endfor %}
+</div>
+{% endif %}<br/>
+{% endblock %}

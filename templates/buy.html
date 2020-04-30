@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if message != "" %}
+        <div class="alert alert-danger" role="alert">
+            {{ message }}
+        </div>
+    {% endif %}
+    <form action="" method="post" novalidate
+          enctype = "multipart/form-data">
+        <div>
+            {{ form.csrf_token }}
+        </div>
+        <h3>{{ product.title }}</h3>
+        <h6>{{ product.description }}</h6>
+        {% set id = product.id|string %}
+        {% set path = "\\static\\image\\products\\" + id + ".jpg" %}
+        <img src={{path}} alt="здесь должна была быть картинка, но не нашлась"><br>
+        {{ form.cost.label() }}
+        {{ form.cost() }}<br>
+        {% for error in form.cost.errors %}
+            <h6>{{ error }}</h6>
+        {% endfor %}
+        {{ form.submit.label() }}
+        {{ form.submit() }}
+    </form>
+{% endblock %}

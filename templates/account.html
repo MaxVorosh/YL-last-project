@@ -19,7 +19,60 @@
     <label>Счёт:</label>
     <p>{{ current_user.money }} руб.</p>
 </div>
-<div style="position: absolute; right: 0px; top: 0px;">
-    {{ current_user.photo }}
+{% if current_user.photo != "" %}
+	<div style="position: absolute; right: 0px; top: 0px;">
+    	<img src="static/image/users/{{ current_user.email }}.{{ current_user.photo }}" width="50%" height="50%">
+	</div>
+{% endif %}
+<h2>Предметы</h2>
+{% if current_user.products == "" %}
+<h3>Товаров нет</h3>
+<a href="/add_product" class="btn btn-warning">Добавить товар</a><br/>
+{% else %}
+<a href="/add_product" class="btn btn-warning">Добавить товар</a><br/><br/><br/>
+<div class="card-columns">
+{% for item in current_user.products.split(";") %}
+{% set item = session.query(Product).filter(Product.id == item).first() %}
+    <div class="card" style="width: 18rem; background-color: rgba(255, 204, 0, 0.5)">
+        <img src="/static/image/products/{{ item.id }}.jpg" class="card-img-top">
+        <div class="card-body">
+            <h5 class="card-title">{{ item.title }}</h5>
+            <p class="card-text">{{ item.text }}</p>
+            <a href="/product/{{ item.id }}" class="btn btn-light">Страница товара</a>
+        </div>
+    </div>
+{% endfor %}
 </div>
+{% endif %}<br/>
+<h2>Сделки</h2>
+{% if current_user.deals is none %}
+<h3>Нет сделок</h3>
+{% else %}
+<table class="table table-striped">
+	<thead>
+		<th scope="col">№</th>
+		<th scope="col">Product id (global)</th>
+		<th scope="col">Partner</th>
+		<th scope="col">Date and time</th>
+	</thead>
+	<tbody>
+		{% for num, deal in enumerate(current_user.deals.split(";")) %}
+		{% set deal = session.query(Deal).filter(Deal.id == deal).first() %}
+		{% set itera = [] %}
+		{% for i in deal.participants.strip(";") %}
+			{% if i != current_user.id %}
+				{% set itera = itera + [i] %}
+			{% endif %}
+		{% endfor %}
+		{% set user = session.query(User).filter(User.id == itera[0]).first() %}
+		<tr>
+			<th scope="row">{{ num + 1 }}</th>
+			<td>{{ deal.product }}</td>
+			<td>{{ user.name }} {{ user.surname }}</td>
+			<td>{{ deal.date }}</td>
+		</tr>
+	</tbody>
+</table>
+		{% endfor %}
+{% endif %}
 {% endblock %}

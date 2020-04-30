@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text
+from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime
 from sqlalchemy_serializer import SerializerMixin
 from .db_session import SqlAlchemyBase
 
@@ -9,3 +9,4 @@ class Deal(SqlAlchemyBase, SerializerMixin):
     product = Column(Integer, ForeignKey("products.id"))
     participants = Column(String)
     history = Column(Text, nullable=True)
+    date = Column(DateTime)

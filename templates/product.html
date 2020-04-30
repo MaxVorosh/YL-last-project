@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Страница продукта</h1>
+<h2>{{ product.title }}</h2>
+{% if product.is_sold == 0 %}
+<a href="#" class="btn btn-warning">Приобрести товар</a><br/>
+{% else %}
+<h3>Товар продан</h3>
+{% endif %}
+<div style="position: absolute; right: 0px; top: 0px;">
+    <img src="/static/image/products/{{ product.id }}.jpg">
+</div>
+<h3>Описание:</h3> <p>{{ product.description }}</p>
+<h3>Владелец</h3>
+<a href="/account/{{ product.owner }}" class="btn btn-light">{{ owner.name }} {{ owner.surname }}</a>
+{% endblock %}

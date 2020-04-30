@@ -1,19 +1,21 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <form action="" method="post" novalidate
-          enctype = "multipart/form-data">
-        <div>
-            {{ form.csrf_token }}
-        </div>
-        {% for field in form if field.name != 'csrf_token' %}
-        <div>
-            {{ field.label() }}
-            {{ field() }}
-            {% for error in field.errors %}
-                <h6>{{ error }}</h6>
-            {% endfor %}
-        </div>
-        {% endfor %}
-    </form>
+<h1>Добавление товара</h1>
+<form action="" method="post" novalidate enctype = "multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        <label for="title">{{ form.title.label }}</label>
+        {{ form.title(class="form-control", id="title")}}
+    </div>
+    <div class="form-group">
+        <label for="description">{{ form.description.label }}</label>
+        {{ form.description(class="form-control", id="description")}}
+    </div>
+    <div class="form-group">
+        <label for="photo">{{ form.photo.label }}</label>
+        {{ form.photo(class="form-control-file", id="photo", type="file") }}
+    </div>
+    {{ form.submit(class="btn btn-warning") }}
+</form>
 {% endblock %}
