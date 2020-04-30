@@ -181,10 +181,11 @@ def new_auction():
                                inventory=inventory)
     if form.submit.data and form.product.data and form.number.data:
         session = db_session.create_session()
-        good = session.query(Products.Product).filter(Products.Product.title == form.product.data)
+        good = session.query(Products.Product).filter(Products.Product.lower.like(f"%{form.product.data.lower()}%"))
         try:
             auction = Auctions.Auction()
-            auction.product = good[form.number.data - 1].id
+            auction.id = good[form.number.data - 1].id
+            auction.product = auction.id
             auction.participants = ""
             auction.history = "0"
             session.add(auction)
@@ -240,9 +241,9 @@ def buy(id):
     if form.validate_on_submit():
         money = current_user.money
         if not (form.cost.data > money or form.cost.data < cost + 15):
-            auc.history = ';'.join(history + [form.cost.data])
+            auc.history = ";".join(history + [str(form.cost.data)])
             current_user.money -= form.cost.data
-            auc.participants = ';'.join(auc.participants.split() + [current_user.id])
+            auc.participants = ';'.join([i for i in auc.participants.split(";") + [str(current_user.id)] if i.strip() != ""])
             session.commit()
             return redirect("/")
         if form.cost.data < cost + 15:

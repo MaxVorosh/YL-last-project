@@ -5,7 +5,7 @@ from .db_session import SqlAlchemyBase
 
 class Auction(SqlAlchemyBase, SerializerMixin):
     __tablename__ = "auctions"
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer, primary_key=True)
     product = Column(Integer, ForeignKey("products.id"))
     participants = Column(String)
     history = Column(Text, nullable=True)
