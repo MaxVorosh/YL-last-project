@@ -1,5 +1,5 @@
 from data import db_session, Users, Products, Auctions, Deals
-from data.forms import RegistrationForm, LoginForm, AddProductForm, AuctionForm, SearchForm
+from data.forms import RegistrationForm, LoginForm, AddProductForm, AuctionForm, SearchForm, BuyForm
 from flask_login import login_user, logout_user, current_user, LoginManager, login_required
 from flask import Flask, render_template, redirect, request
 from random import choice, randint
@@ -31,7 +31,8 @@ login_manager.init_app(app)
 @login_required
 def account():
     session = db_session.create_session()
-    return render_template("account.html", current_user=current_user, session=session, Product=Products.Product, Deal=Deals.Deal, User=Users.User, account=current_user)
+    return render_template("account.html", current_user=current_user, session=session, Product=Products.Product,
+                           Deal=Deals.Deal, User=Users.User, account=current_user)
 
 
 @login_manager.user_loader
@@ -151,7 +152,6 @@ def Search():
     return render_template("Search.html", message='', current_user=current_user, form=form, inventory=[])
 
 
-
 @app.route("/inventory")
 @login_required
 def Inventory():
@@ -175,7 +175,7 @@ def new_auction():
         session = db_session.create_session()
         good = session.query(Products.Product).filter(Products.Product.title == form.product.data)
         try:
-            auction = Auctions.Auction(product=good[form.number.data - 1].id, participants='')
+            auction = Auctions.Auction(product=good[form.number.data - 1].id, participants='', history='0')
             session.add(auction)
             session.commit()
             return redirect("/")
@@ -211,6 +211,35 @@ def account_user(id):
 @login_required
 def make_deal(id):
     session = db_session.create_session()
+
+
+@app.route("/buy/<int:id>", methods=["GET", "POST"])
+@login_required
+def buy(id):
+    # id продукта
+    # try:
+    form = BuyForm()
+    session = db_session.create_session()
+    auc = session.query(Auctions.Auction).filter(Auctions.Auction.product == id)[0]
+    pr = session.query(Products.Product).filter(Products.Product.id == id)[0]
+    history = auc.history.split(';')
+    cost = int(history[-1])
+    if form.validate_on_submit():
+        money = current_user.money
+        if not (form.cost.data > money or form.cost.data < cost + 15):
+            auc.history = ';'.join(history + [form.cost.data])
+            current_user.money -= form.cost.data
+            auc.participants = ';'.join(auc.participants.split() + [current_user.id])
+            session.commit()
+            return redirect("/")
+        if form.cost.data < cost + 15:
+            return render_template("buy.html", message='Увеличте предыдущую ставку хотя бы на 15 у.е.',
+                                  current_user=current_user, form=form, cost=cost, product=pr)
+        return render_template("buy.html", message='Не хватает денег', current_user=current_user, form=form,
+                               cost=cost, product=pr)
+    return render_template("buy.html", message='', current_user=current_user, form=form, cost=cost, product=pr)
+    # except Exception as e:
+    #     return redirect("/")
 
 
 if __name__ == "__main__":

@@ -45,3 +45,8 @@ class SearchForm(FlaskForm):
     search = SubmitField("Поиск")
     number = IntegerField("Введите порядковый номер объекта из выбранных")
     submit = SubmitField("Перейти к предмету")
+
+
+class BuyForm(FlaskForm):
+    cost = IntegerField("Ваша ставка", validators=[DataRequired()])
+    submit = SubmitField("Сделать ставку")
