@@ -11,28 +11,35 @@
         <div>
             {{ form.csrf_token }}
         </div>
-        {{ form.product.label() }}
-        {{ form.product() }}
-        {% for error in form.product.errors %}
-            <h6>{{ error }}</h6>
-        {% endfor %}
-        {{ form.search() }}
+        <div class="form-group">
+            <label for="product">{{ form.product.label() }}</label>
+            {{ form.product(class="form-control", id="product") }}
+            {% for error in form.product.errors %}
+                <h6>{{ error }}</h6>
+            {% endfor %}
+        </div>
+        <div class="form-group">
+            {{ form.search(class="btn btn-warning") }}
+        </div>
         <br>
         {% for tup in inventory %}
             {% set path = tup[0] %}
             {% set obj = tup[1] %}
-            <h3>{{obj.title}}</h3>
-            <h6>{{obj.description}}</h6>
-            <img src={{path}} alt="здесь должна была быть картинка, но не нашлась">
-            <br>
+            <div class="form-group">
+                <h3>{{obj.title}}</h3>
+                <h6>{{obj.description}}</h6>
+                <img src={{path}} alt="здесь должна была быть картинка, но не нашлась">
+            </div>
         {% endfor %}
-        {{ form.number.label() }}
-        {{ form.number() }}
+        <div class="form-group">
+            <label for="number">{{ form.number.label() }}</label>
+            {{ form.number(id="number", class="form-control") }}
+        </div>
         <br>
         {% for error in form.number.errors %}
             <h6>{{ error }}</h6>
         {% endfor %}
         {{ form.submit.label() }}
-        {{ form.submit() }}
+        {{ form.submit(class="btn btn-warning") }}
     </form>
 {% endblock %}

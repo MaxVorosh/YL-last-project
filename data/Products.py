@@ -10,4 +10,4 @@ class Product(SqlAlchemyBase, SerializerMixin):
     description = Column(String)
     owner = Column(Integer, ForeignKey("users.id"))
     is_sold = Column(Boolean, default=False)
-    photo = Column(String)
+    lower = Column(String)

@@ -3,6 +3,7 @@ from data.forms import RegistrationForm, LoginForm, AddProductForm, AuctionForm,
 from flask_login import login_user, logout_user, current_user, LoginManager, login_required
 from flask import Flask, render_template, redirect, request
 from random import choice, randint
+import sqlalchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
@@ -31,7 +32,8 @@ login_manager.init_app(app)
 @login_required
 def account():
     session = db_session.create_session()
-    return render_template("account.html", current_user=current_user, session=session, Product=Products.Product,
+    return render_template("account.html", current_user=current_user, session=session,
+                           Product=Products.Product,
                            Deal=Deals.Deal, User=Users.User, account=current_user)
 
 
@@ -62,7 +64,8 @@ def login():
         if check_password_hash(user.password, form.password.data):
             login_user(user, remember=form.remember.data)
             return redirect("/")
-        return render_template("login.html", current_user=current_user, form=form, message="Ложный пароль.")
+        return render_template("login.html", current_user=current_user, form=form,
+                               message="Ложный пароль.")
     return render_template("login.html", current_user=current_user, form=form, message="")
 
 
@@ -80,20 +83,21 @@ def register():
         session = db_session.create_session()
         if form.photo.data:
             filename = form.photo.data.filename
-            form.photo.data.save("static/image/users/" + form.login.data + "." + filename.split(".")[-1])
+            form.photo.data.save(
+                "static/image/users/" + form.login.data + "." + filename.split(".")[-1])
         if session.query(Users.User).filter(Users.User.email == form.login.data).first() is not None:
             return render_template("register.html", message="Подобный email уже используется.",
                                    current_user=current_user, form=form)
         if form.password.data != form.confirm_password.data:
-            return render_template("register.html", message="Пароли не совпадают.", current_user=current_user,
+            return render_template("register.html", message="Пароли не совпадают.",
+                                   current_user=current_user,
                                    form=form)
-        user = Users.User(
-            email=form.login.data,
-            password=generate_password_hash(form.password.data),
-            name=form.name.data,
-            surname=form.surname.data,
-            photo=form.photo.data.filename.split(".")[-1] if form.photo.data else ""
-        )
+        user = Users.User()
+        user.email = form.login.data
+        user.password = generate_password_hash(form.password.data)
+        user.name = form.name.data
+        user.surname = form.surname.data
+        user.photo = form.photo.data.filename.split(".")[-1] if form.photo.data else ""
         session.add(user)
         session.commit()
         login_user(user)
@@ -109,11 +113,11 @@ def AddProduct():
     if form.validate_on_submit():
         session = db_session.create_session()
         photo = form.photo.data
-        product = Products.Product(
-            title=form.title.data,
-            description=form.description.data,
-            owner=current_user.id,
-        )
+        product = Products.Product()
+        product.title = form.title.data
+        product.description = form.description.data
+        product.owner = current_user.id
+        product.lower = product.title.lower()
         session.add(product)
         session.commit()
         id = session.query(Products.Product).all()
@@ -137,7 +141,8 @@ def Search():
     session = db_session.create_session()
     if form.search.data and form.product.data:
         good = session.query(Products.Product).filter(Products.Product.title == form.product.data)
-        inventory = list(map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), good))
+        inventory = list(
+            map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), good))
         return render_template("Search.html", message='', current_user=current_user, form=form,
                                inventory=inventory)
     if form.submit.data and form.product.data and form.number.data:
@@ -149,7 +154,8 @@ def Search():
             return render_template("Search.html", message='Введите действительный номер',
                                    current_user=current_user,
                                    form=form, inventory=[])
-    return render_template("Search.html", message='', current_user=current_user, form=form, inventory=[])
+    return render_template("Search.html", message='', current_user=current_user, form=form,
+                           inventory=[])
 
 
 @app.route("/inventory")
@@ -157,7 +163,8 @@ def Search():
 def Inventory():
     session = db_session.create_session()
     inventory = session.query(Products.Product).filter(Products.Product.owner == current_user.id)
-    inventory = list(map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), inventory))
+    inventory = list(
+        map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), inventory))
     return render_template('inventory.html', current_user=current_user, inventory=inventory)
 
 
@@ -167,22 +174,28 @@ def new_auction():
     form = AuctionForm()
     if form.search.data and form.product.data:
         session = db_session.create_session()
-        good = session.query(Products.Product).filter(Products.Product.title == form.product.data)
-        inventory = list(map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), good))
+        good = session.query(Products.Product).filter(Products.Product.lower.like(f"%{form.product.data.lower()}%"))
+        inventory = list(
+            map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), good))
         return render_template("AddAuction.html", message='', current_user=current_user, form=form,
                                inventory=inventory)
     if form.submit.data and form.product.data and form.number.data:
         session = db_session.create_session()
         good = session.query(Products.Product).filter(Products.Product.title == form.product.data)
         try:
-            auction = Auctions.Auction(product=good[form.number.data - 1].id, participants='', history='0')
+            auction = Auctions.Auction()
+            auction.product = good[form.number.data - 1].id
+            auction.participants = ""
+            auction.history = "0"
             session.add(auction)
             session.commit()
             return redirect("/")
         except:
-            return render_template("AddAuction.html", message='Введите действительный номер', current_user=current_user,
+            return render_template("AddAuction.html", message='Введите действительный номер',
+                                   current_user=current_user,
                                    form=form, inventory=[])
-    return render_template("AddAuction.html", message='', current_user=current_user, form=form, inventory=[])
+    return render_template("AddAuction.html", message='', current_user=current_user, form=form,
+                           inventory=[])
 
 
 @app.route("/product/<int:id>")
@@ -220,7 +233,7 @@ def buy(id):
     # try:
     form = BuyForm()
     session = db_session.create_session()
-    auc = session.query(Auctions.Auction).filter(Auctions.Auction.product == id)[0]
+    auc = session.query(Auctions.Auction).filter(Auctions.Auction.product == id).first()
     pr = session.query(Products.Product).filter(Products.Product.id == id)[0]
     history = auc.history.split(';')
     cost = int(history[-1])
@@ -233,11 +246,14 @@ def buy(id):
             session.commit()
             return redirect("/")
         if form.cost.data < cost + 15:
-            return render_template("buy.html", message='Увеличте предыдущую ставку хотя бы на 15 у.е.',
-                                  current_user=current_user, form=form, cost=cost, product=pr)
-        return render_template("buy.html", message='Не хватает денег', current_user=current_user, form=form,
+            return render_template("buy.html",
+                                   message='Увеличте предыдущую ставку хотя бы на 15 у.е.',
+                                   current_user=current_user, form=form, cost=cost, product=pr)
+        return render_template("buy.html", message='Не хватает денег', current_user=current_user,
+                               form=form,
                                cost=cost, product=pr)
-    return render_template("buy.html", message='', current_user=current_user, form=form, cost=cost, product=pr)
+    return render_template("buy.html", message='', current_user=current_user, form=form, cost=cost,
+                           product=pr)
     # except Exception as e:
     #     return redirect("/")
 
