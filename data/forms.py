@@ -55,3 +55,7 @@ class BuyForm(FlaskForm):
 class DealForm(FlaskForm):
     comment = TextAreaField("Комментарий (необязательно)")
     submit = SubmitField("Отправить запрос")
+
+
+class CloseForm(FlaskForm):
+    submit = SubmitField("Подтвердить сделку")

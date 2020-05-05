@@ -1,5 +1,6 @@
 from data import db_session, Users, Products, Auctions, Deals
-from data.forms import RegistrationForm, LoginForm, AddProductForm, AuctionForm, SearchForm, BuyForm, DealForm
+from data.forms import RegistrationForm, LoginForm, AddProductForm, AuctionForm, SearchForm, BuyForm, DealForm, \
+    CloseForm
 from flask_login import login_user, logout_user, current_user, LoginManager, login_required
 from flask import Flask, render_template, redirect, request
 from random import choice, randint
@@ -97,6 +98,7 @@ def register():
         user.password = generate_password_hash(form.password.data)
         user.name = form.name.data
         user.surname = form.surname.data
+        user.money = 50.0
         user.photo = form.photo.data.filename.split(".")[-1] if form.photo.data else ""
         session.add(user)
         session.commit()
@@ -241,14 +243,21 @@ def buy(id):
     session = db_session.create_session()
     auc = session.query(Auctions.Auction).filter(Auctions.Auction.product == id).first()
     pr = session.query(Products.Product).filter(Products.Product.id == id)[0]
+    user = session.query(Users.User).filter(Users.User.id == current_user.id)[0]
     history = auc.history.split(';')
     cost = int(history[-1])
     if form.validate_on_submit():
         money = current_user.money
         if not (form.cost.data > money or form.cost.data < cost + 15):
             auc.history = ";".join(history + [str(form.cost.data)])
-            current_user.money -= form.cost.data
-            auc.participants = ';'.join([i for i in auc.participants.split(";") + [str(current_user.id)] if i.strip() != ""])
+            user.money -= form.cost.data
+            try:
+                last_user = session.query(Users.User).filter(Users.User.id == int(auc.participants.split(';')[-1]))[0]
+                last_user.money += int(auc.history.split(';')[-1])
+            except Exception:
+                pass
+            auc.participants = ';'.join(
+                [i for i in auc.participants.split(";") + [str(current_user.id)] if i.strip() != ""])
             session.commit()
             return redirect("/")
         if form.cost.data < cost + 15:
@@ -262,6 +271,38 @@ def buy(id):
                            product=pr)
     # except Exception as e:
     #     return redirect("/")
+
+
+@app.route("/close_auction/<int:id>", methods=["GET", "POST"])
+@login_required
+def close_auction(id):
+    # id аукциона
+    form = CloseForm()
+    session = db_session.create_session()
+    auc = session.query(Auctions.Auction).filter(Auctions.Auction.id == id)[0]
+    prod = session.query(Products.Product).filter(Products.Product.id == auc.product)[0]
+    last = auc.participants.split(';')[-1]
+    win = session.query(Users.User).filter(Users.User.id == last)[0]
+    win_money = int(auc.history.split(';')[-1])
+    user = session.query(Users.User).filter(Users.User.id == current_user.id)[0]
+    if form.submit.data and prod.owner == user.id:
+        prod.owner = last
+        win.products = ';'.join(win.products.split(';') + [str(prod.id)])
+        auc.winner = last
+        user.money += win_money
+        deal = Deals.Deal()
+        deal.participants = ';'.join([str(current_user.id), str(last)])
+        deal.product = prod.id
+        deal.histaory = win_money
+        auc.deal = deal.id
+        session.add(deal)
+        session.delete(auc)
+        session.commit()
+        return redirect("/")
+    if form.submit.data:
+        return render_template("no_access.html")
+    return render_template("close_auction.html", message='', current_user=current_user, form=form, product=prod,
+                           money=win_money)
 
 
 if __name__ == "__main__":
