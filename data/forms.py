@@ -54,8 +54,14 @@ class BuyForm(FlaskForm):
 
 class DealForm(FlaskForm):
     comment = TextAreaField("Комментарий (необязательно)")
+    cost = IntegerField("Предлагаемая цена")
     submit = SubmitField("Отправить запрос")
 
 
 class CloseForm(FlaskForm):
     submit = SubmitField("Подтвердить сделку")
+
+
+class AcceptForm(FlaskForm):
+    yes = SubmitField("Согласиться")
+    no = SubmitField("Отказаться")

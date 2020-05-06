@@ -1,12 +1,13 @@
 from data import db_session, Users, Products, Auctions, Deals
 from data.forms import RegistrationForm, LoginForm, AddProductForm, AuctionForm, SearchForm, BuyForm, DealForm, \
-    CloseForm
+    CloseForm, AcceptForm
 from flask_login import login_user, logout_user, current_user, LoginManager, login_required
 from flask import Flask, render_template, redirect, request
 from random import choice, randint
 import sqlalchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
+import datetime
 
 
 def my_hash(s):
@@ -228,9 +229,26 @@ def make_deal(id):
     session = db_session.create_session()
     product = session.query(Products.Product).get(id)
     owner = session.query(Users.User).get(product.owner)
+    cur = session.query(Users.User).get(current_user.id)
     form = DealForm()
     if form.validate_on_submit():
-        pass
+        if cur.money >= form.cost.data >= 0:
+            deal = Deals.Deal()
+            deal.product = product.id
+            deal.participants = ';'.join([str(owner.id), str(cur.id)])
+            deal.history = str(form.cost.data)
+            cur.money -= form.cost.data
+            session.add(deal)
+            session.commit()
+            owner.deals = ';'.join(owner.deals.split(';') + [str(deal.id)]) if owner.deals else str(deal.id)
+            cur.deals = ';'.join(cur.deals.split(';') + [str(deal.id)]) if cur.deals else str(deal.id)
+            session.commit()
+            return redirect("/")
+        elif form.cost.data < 0:
+            return render_template("Deal.html", form=form, product=product, owner=owner, message="Хорошая попытка")
+        else:
+            return render_template("Deal.html", form=form, product=product, owner=owner,
+                                   message="У вас нет такого числа денег")
     return render_template("Deal.html", form=form, product=product, owner=owner, message="")
 
 
@@ -294,8 +312,11 @@ def close_auction(id):
         deal.participants = ';'.join([str(current_user.id), str(last)])
         deal.product = prod.id
         deal.histaory = win_money
+        deal.date = datetime.datetime.now()
         auc.deal = deal.id
         session.add(deal)
+        user.deal = ';'.join(user.deal.split(';') + [str(deal.id)])
+        win.deal = ';'.join(win.deal.split(';') + [str(deal.id)])
         session.delete(auc)
         session.commit()
         return redirect("/")
@@ -303,6 +324,37 @@ def close_auction(id):
         return render_template("no_access.html")
     return render_template("close_auction.html", message='', current_user=current_user, form=form, product=prod,
                            money=win_money)
+
+
+@app.route("/accept_deal/<int:id>", methods=["GET", "POST"])
+@login_required
+def accept_deal(id):
+    # id сделки
+    form = AcceptForm()
+    session = db_session.create_session()
+    deal = session.query(Deals.Deal).get(id)
+    prod = session.query(Products.Product).get(deal.product)
+    from_user = session.query(Users.User).get(int(deal.participants.split(';')[0]))
+    to_user = session.query(Users.User).get(int(deal.participants.split(';')[1]))
+    if from_user.id != current_user.id:
+        return render_template("no_access.html")
+    if form.yes.data:
+        deal.date = datetime.datetime.now()
+        prod.owner = to_user.id
+        to_user.products = ';'.join(to_user.products.split(';') + [str(prod.id)])
+        from_user.money += int(deal.history)
+        from_user.products = ';'.join(list(filter(lambda x: int(x) != prod.id, from_user.products.split(';'))))
+        session.commit()
+        return redirect("/")
+    if form.no.data:
+        to_user.money += int(deal.history)
+        from_user.deals = ';'.join(list(filter(lambda x: int(x) != id, from_user.deals.split(';'))))
+        to_user.deals = ';'.join(list(filter(lambda x: int(x) != id, to_user.deals.split(';'))))
+        session.delete(deal)
+        session.commit()
+        return redirect("/")
+    return render_template("accept_deal.html", message='', current_user=current_user, form=form, product=prod,
+                           money=int(deal.history))
 
 
 if __name__ == "__main__":

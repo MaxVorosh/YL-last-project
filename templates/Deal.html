@@ -19,6 +19,8 @@
         <label for="comment">{{ form.comment.label }}</label>
         {{ form.comment(id="comment", class="form-control") }}
     </div>
+    {{ form.cost() }}
+    {{ form.cost.label() }}
     <div class="form-group">
         {{ form.submit(class="btn btn-warning") }}
     </div>
