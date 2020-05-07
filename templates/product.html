@@ -2,10 +2,14 @@
 {% block content %}
 <h1>Страница продукта</h1>
 <h2>{{ product.title }}</h2>
-{% if product.is_sold == 0 %}
-<a href="/make_deal/{{ product.id }}" class="btn btn-warning">Приобрести товар</a><br/>
-{% else %}
+{% if product.is_sold == 1 %}
 <h3>Товар продан</h3>
+{% elif owner.id == current_user.id %}
+<h4>Вы владелец</h4>
+{% elif current_user.is_authenticated == 0 %}
+<h4>Войдите на сайт</h4>
+{% else %}
+<a href="/make_deal/{{ product.id }}" class="btn btn-warning">Приобрести товар</a><br/>
 {% endif %}
 <div style="position: absolute; right: 0px; top: 0px;">
     <img src="/static/image/products/{{ product.id }}.jpg">

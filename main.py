@@ -208,7 +208,7 @@ def product(id):
     if pr is None:
         return redirect("/")
     owner = session.query(Users.User).get(pr.owner)
-    return render_template("product.html", product=pr, owner=owner)
+    return render_template("product.html", product=pr, owner=owner, current_user=current_user)
 
 
 @app.route("/account/<int:id>")
@@ -311,7 +311,7 @@ def close_auction(id):
         deal = Deals.Deal()
         deal.participants = ';'.join([str(current_user.id), str(last)])
         deal.product = prod.id
-        deal.histaory = win_money
+        deal.history = win_money
         deal.date = datetime.datetime.now()
         auc.deal = deal.id
         session.add(deal)
