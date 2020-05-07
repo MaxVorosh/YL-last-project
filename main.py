@@ -59,10 +59,8 @@ def accept_deal(deal_id):
         return redirect("/")
     if form.no.data:
         to_user.money += int(deal.history)
-        from_user.deals = ';'.join(list(filter(lambda x: int(x) != deal_id,
-                                               from_user.deals.split(';'))))
-        to_user.deals = ';'.join(list(filter(lambda x: int(x) != deal_id,
-                                             to_user.deals.split(';'))))
+        from_user.deals = ';'.join(list(filter(lambda x: int(x) != id, from_user.deals.split(';'))))
+        to_user.deals = ';'.join(list(filter(lambda x: int(x) != id, to_user.deals.split(';'))))
         session.delete(deal)
         session.commit()
         return redirect("/")
@@ -194,7 +192,7 @@ def close_auction(auc_id):
         deal = Deals.Deal()
         deal.participants = ';'.join([str(current_user.id), str(last)])
         deal.product = prod.id
-        deal.history = win_money
+        deal.histaory = win_money
         deal.date = datetime.datetime.now()
         auc.deal = deal.id
         session.add(deal)
