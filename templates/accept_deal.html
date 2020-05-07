@@ -3,14 +3,14 @@
 {% block content %}
 <form action="" method="post" novalidate
           enctype = "multipart/form-data">
-    <h2>Запрос на пкоупку</h2>
-    {{ product.title }}<br>
-    {{ product.description }}<br>
+    <h2>Запрос на покупку</h2>
+    <h2>{{ product.title }}</h2>
+    <h3>Описание:</h3> <p>{{ product.description }}</p>
     {% set id = product.id|string %}
     {% set path = "\\static\\image\\products\\" + id + ".jpg" %}
-    <img src={{path}} alt="здесь должна была быть картинка, но не нашлась"><br>
+    <img src={{path}} alt="Здесь должна была быть картинка, но не нашлась"><br>
     <h4>Предлагаемая цена - {{ money }}</h4>
-    {{ form.yes() }}
-    {{ form.no() }}
+    {{ form.yes(class="btn btn-success") }}
+    {{ form.no(class="btn btn-danger") }}
 </form>
 {% endblock %}
