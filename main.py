@@ -176,21 +176,26 @@ def new_auction():
     form = AuctionForm()
     if form.search.data and form.product.data:
         session = db_session.create_session()
-        good = session.query(Products.Product).filter(Products.Product.lower.like(f"%{form.product.data.lower()}%"))
+        good = session.query(Products.Product).filter(Products.Product.lower.like(f"%{form.product.data.lower()}%"),
+                                                      Products.Product.id.in_(current_user.products.split(';')))
         inventory = list(
             map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), good))
         return render_template("AddAuction.html", message='', current_user=current_user, form=form,
                                inventory=inventory)
     if form.submit.data and form.product.data and form.number.data:
         session = db_session.create_session()
-        good = session.query(Products.Product).filter(Products.Product.lower.like(f"%{form.product.data.lower()}%"))
+        good = session.query(Products.Product).filter(Products.Product.lower.like(f"%{form.product.data.lower()}%"),
+                                                      Products.Product.id.in_(current_user.products.split(';')))
         try:
             auction = Auctions.Auction()
             auction.id = good[form.number.data - 1].id
-            auction.product = auction.id
+            auction.product = good[form.number.data - 1].id
             auction.participants = ""
             auction.history = "0"
             session.add(auction)
+            user = session.query(Users.User).get(current_user.id)
+            user.products = ';'.join(
+                list(filter(lambda x: int(x) != good[form.number.data - 1].id, user.products.split(';'))))
             session.commit()
             return redirect("/")
         except:
