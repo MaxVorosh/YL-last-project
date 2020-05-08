@@ -17,19 +17,21 @@ class RegistrationForm(FlaskForm):
     confirm_password = PasswordField("Повтор пароля", validators=[DataRequired()])
     name = StringField("Имя", validators=[DataRequired()])
     surname = StringField("Фамилия", validators=[DataRequired()])
-    photo = FileField("Фотография (не обязательно) (советуется квадратную)",
-                      validators=[FileAllowed(['jpg', 'png', 'jpeg'],
-                                              "Файл должен быть одного из этих форматов: 'jpg', 'png', 'jpeg'")])
-    submit = SubmitField("Зарегестрироваться")
+    photo = FileField(
+        "Фотография (не обязательно) (советуется квадратную)",
+        validators=[FileAllowed(['jpg', 'png', 'jpeg'],
+                                "Файл должен быть одного из этих форматов: 'jpg', 'png', 'jpeg'")])
+    submit = SubmitField("Отправить")
 
 
 class AddProductForm(FlaskForm):
     title = StringField("Название", validators=[DataRequired()])
     description = StringField("Описание", validators=[DataRequired()])
-    photo = FileField("Изображение",
-                      validators=[FileRequired(),
-                                  FileAllowed(['jpg', 'png', 'jpeg'],
-                                              "Файл должен быть одного из этих форматов: 'jpg', 'png', 'jpeg'")])
+    photo = FileField(
+        "Изображение",
+        validators=[FileRequired(),
+                    FileAllowed(['jpg', 'png', 'jpeg'],
+                                "Файл должен быть одного из этих форматов: 'jpg', 'png', 'jpeg'")])
     submit = SubmitField("Подтвердить")
 
 

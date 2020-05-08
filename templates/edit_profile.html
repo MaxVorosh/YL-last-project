@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Регистрация</h1>
+{% if message != "" %}
+    <div class="alert alert-danger" role="alert">
+      {{ message }}
+    </div>
+{% endif %}
+<form method="post" novalidate enctype = "multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        <label for="name">{{ form.name.label }}</label>
+        {{ form.name(class="form-control", id="name", value=current_user.name) }}
+        {% for error in form.name.errors %}
+                <h6>{{ error }}</h6>
+        {% endfor %}
+    </div>
+    <div class="form-group">
+        <label for="surname">{{ form.surname.label }}</label>
+        {{ form.surname(class="form-control", id="surname", value=current_user.surname) }}
+        {% for error in form.surname.errors %}
+                <h6>{{ error }}</h6>
+        {% endfor %}
+    </div>
+    <div class="form-group">
+        <label for="email">{{ form.login.label }}</label>
+        {{ form.login(class="form-control", id="email", value=current_user.email) }}
+        {% for error in form.login.errors %}
+                <h6>{{ error }}</h6>
+        {% endfor %}
+    </div>
+    <div class="form-group">
+        <label for="password">{{ form.password.label }} (обязательно)</label>
+        {{ form.password(class="form-control", id="password", type="password") }}
+        {% for error in form.password.errors %}
+                <h6>{{ error }}</h6>
+        {% endfor %}
+    </div>
+    <div class="form-group">
+        <label for="confirm-password"> {{ form.confirm_password.label }}</label>
+        {{ form.confirm_password(class="form-control", id="confirm-password", type="password") }}
+        {% for error in form.confirm_password.errors %}
+                <h6>{{ error }}</h6>
+        {% endfor %}
+    </div>
+    <div class="form-group">
+        <label for="photo">{{ form.photo.label }} (если уже есть, загружать необязательно)</label>
+        {{ form.photo(class="form-control-file", id="photo", type="file") }}
+    </div>
+    {{ form.submit(class="btn btn-warning") }}
+</form>
+{% endblock %}

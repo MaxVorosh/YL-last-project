@@ -24,6 +24,8 @@
     <img src="static/image/users/{{ current_user.email }}.{{ current_user.photo }}" width="50%"
          height="50%">
 </div>
+<div class="form-group">
+    <a href="/edit_profile" class="nav-link"><font size="5">Отредактировать профиль</font></a>
 {% endif %}
 <h2>Предметы</h2>
 {% if current_user.products == "" %}

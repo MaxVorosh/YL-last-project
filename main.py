@@ -209,6 +209,38 @@ def close_auction(auc_id):
                            product=prod, money=win_money)
 
 
+@app.route("/edit_profile", methods=["GET", "POST"])
+def edit_profile():
+    if current_user.is_authenticated is False:
+        return redirect("/register")
+    session = db_session.create_session()
+    user = session.query(Users.User).get(current_user.id)
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        print(form.password.data)
+        if form.password.data is None:
+            return render_template("edit_profile.html", message="Необходимо ввести пароль",
+                                   form=form, current_user=current_user)
+        if form.password.data != form.confirm_password.data or form.confirm_password.data is None:
+            return render_template("edit_profile.html", message="Пароли не совпадают", form=form,
+                                   current_user=current_user)
+        if check_password_hash(user.password, form.password.data):
+            user.name = form.name.data
+            user.surname = form.surname.data
+            user.login = form.login.data
+            if form.photo.data:
+                filename = form.photo.data.filename
+                form.photo.data.save(
+                    "static/image/users/" + form.login.data + "." + filename.split(".")[-1])
+            session.commit()
+            logout_user()
+            login_user(user)
+            return redirect("/account")
+        return render_template("edit_profile.html", message="Ложный пароль", form=form,
+                               current_user=current_user)
+    return render_template("edit_profile.html", current_user=current_user, form=form, message="")
+
+
 @app.route("/inventory")
 @login_required
 def inventory():
