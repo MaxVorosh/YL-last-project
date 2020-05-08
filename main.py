@@ -55,12 +55,13 @@ def accept_deal(deal_id):
         from_user.money += int(deal.history)
         from_user.products = ';'.join(list(filter(
             lambda x: int(x) != prod.id, from_user.products.split(';'))))
+        prod.is_sold = True
         session.commit()
         return redirect("/")
     if form.no.data:
         to_user.money += int(deal.history)
-        from_user.deals = ';'.join(list(filter(lambda x: int(x) != id, from_user.deals.split(';'))))
-        to_user.deals = ';'.join(list(filter(lambda x: int(x) != id, to_user.deals.split(';'))))
+        from_user.deals = ';'.join(list(filter(lambda x: int(x) != deal_id, from_user.deals.split(';'))))
+        to_user.deals = ';'.join(list(filter(lambda x: int(x) != deal_id, to_user.deals.split(';'))))
         session.delete(deal)
         session.commit()
         return redirect("/")
@@ -73,10 +74,11 @@ def accept_deal(deal_id):
 def account():
     session = db_session.create_session()
     deals = []
-    if current_user.deals is not None:
+    if current_user.deals is not None and current_user.deals.strip() != "":
         for deal in current_user.deals.split(";"):
             deal = session.query(Deals.Deal).filter(Deals.Deal.id == deal).first()
-            curr = session.query(Products.Product).filter(Products.Product.id == deal.product).first()
+            curr = session.query(Products.Product).filter(
+                Products.Product.id == deal.product).first()
             title = curr.title
             if len(title) > 25:
                 title = title[0:24] + "..."
@@ -287,7 +289,8 @@ def new_auction():
     if form.search.data and form.product.data:
         session = db_session.create_session()
         good = session.query(Products.Product).filter(
-            Products.Product.lower.like(f"%{form.product.data.lower()}%"))
+            Products.Product.lower.like(f"%{form.product.data.lower()}%"),
+            Products.Product.is_sold == 0)
         inv = list(
             map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), good))
         return render_template("AddAuction.html", message='', current_user=current_user, form=form,
@@ -295,7 +298,7 @@ def new_auction():
     if form.submit.data and form.product.data and form.number.data:
         session = db_session.create_session()
         good = session.query(Products.Product).filter(Products.Product.lower.like(
-            f"%{form.product.data.lower()}%"))
+            f"%{form.product.data.lower()}%"), Products.Product.is_sold == 0)
         try:
             auction = Auctions.Auction()
             auction.id = good[form.number.data - 1].id
@@ -360,7 +363,7 @@ def search():
     session = db_session.create_session()
     if form.search.data and form.product.data:
         good = session.query(Products.Product).filter(Products.Product.lower.like(
-            f"%{form.product.data.lower()}%"))
+            f"%{form.product.data.lower()}%"), Products.Product.is_sold == 0)
         inv = list(
             map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), good))
         return render_template("Search.html", message='', current_user=current_user, form=form,
@@ -368,7 +371,7 @@ def search():
     if form.submit.data and form.product.data and form.number.data:
         session = db_session.create_session()
         good = session.query(Products.Product).filter(Products.Product.lower.like(
-            f"%{form.product.data.lower()}%"))
+            f"%{form.product.data.lower()}%"), Products.Product.is_sold == 0)
         try:
             return redirect(f"/product/{good[form.number.data - 1].id}")
         except Exception as error:

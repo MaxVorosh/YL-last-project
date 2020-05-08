@@ -27,6 +27,7 @@
 <div class="card-columns">
 {% for item in user.products.split(";") %}
 {% set item = session.query(Product).filter(Product.id == item).first() %}
+    {% if item.is_sold == 0 %}
     <div class="card" style="width: 18rem; background-color: rgba(255, 204, 0, 0.5)">
         <img src="/static/image/products/{{ item.id }}.jpg" class="card-img-top">
         <div class="card-body">
@@ -35,6 +36,7 @@
             <a href="/product/{{ item.id }}" class="btn btn-light">Страница товара</a>
         </div>
     </div>
+    {% endif %}
 {% endfor %}
 </div>
 {% endif %}<br/>

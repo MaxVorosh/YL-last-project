@@ -34,6 +34,7 @@
 <div class="card-columns">
     {% for item in current_user.products.split(";") %}
     {% set item = session.query(Product).filter(Product.id == item).first() %}
+    {% if item.is_sold == 0 %}
     <div class="card" style="width: 18rem; background-color: rgba(255, 204, 0, 0.5)">
         <img src="/static/image/products/{{ item.id }}.jpg" class="card-img-top">
         <div class="card-body">
@@ -42,11 +43,30 @@
             <a href="/product/{{ item.id }}" class="btn btn-light">Страница товара</a>
         </div>
     </div>
+    {% endif %}
     {% endfor %}
 </div>
 {% endif %}<br/>
+{% if session.query(Product).filter(Product.is_sold == 1, Product.owner == current_user.id).first() is not none %}
+<h2>Купленные товары</h2>
+<div class="card-columns">
+    {% for item in current_user.products.split(";") %}
+    {% set item = session.query(Product).filter(Product.id == item).first() %}
+    {% if item.is_sold == 1 %}
+    <div class="card" style="width: 18rem; background-color: rgba(255, 204, 0, 0.5)">
+        <img src="/static/image/products/{{ item.id }}.jpg" class="card-img-top">
+        <div class="card-body">
+            <h5 class="card-title">{{ item.title }}</h5>
+            <p class="card-text">{{ item.text }}</p>
+            <a href="/product/{{ item.id }}" class="btn btn-light">Страница товара</a>
+        </div>
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
 <h2>Сделки</h2>
-{% if current_user.deals is none %}
+{% if current_user.deals is none or current_user.deals == "" %}
 <h3>Нет сделок</h3>
 {% else %}
 <table class="table table-striped">

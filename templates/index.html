@@ -13,7 +13,7 @@
 </div>
 <h1>Последние товары</h1>
 <div class="card-columns">
-    {% for item in session.query(Product).all()[::-1][:10] %}
+    {% for item in session.query(Product).filter(Product.is_sold == 0).all()[::-1][:10] %}
     <div class="card" style="width: 18rem; background-color: rgba(255, 204, 0, 0.5)">
         <img src="/static/image/products/{{ item.id }}.jpg" class="card-img-top">
         <div class="card-body">
