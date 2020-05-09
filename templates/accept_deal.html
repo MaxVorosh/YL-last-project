@@ -9,7 +9,7 @@
     {% set id = product.id|string %}
     {% set path = "\\static\\image\\products\\" + id + ".jpg" %}
     <img src={{path}} alt="Здесь должна была быть картинка, но не нашлась"><br>
-    <h4>Предлагаемая цена - {{ money }}</h4>
+    <h4>Предлагаемая цена - {{ money }} руб.</h4>
     {{ form.yes(class="btn btn-success") }}
     {{ form.no(class="btn btn-danger") }}
 </form>

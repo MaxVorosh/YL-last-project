@@ -82,13 +82,15 @@ def account():
             title = curr.title
             if len(title) > 25:
                 title = title[0:24] + "..."
-            if deal.participants.split(";")[0] != current_user:
-                partner = deal.participants.split(";")[0]
+            if int(deal.participants.split(";")[0]) != current_user.id:
+                partner = int(deal.participants.split(";")[0])
             else:
-                partner = deal.participants.split(";")[1]
+                partner = int(deal.participants.split(";")[1])
             user = session.query(Users.User).filter(Users.User.id == partner).first()
             check = "Подтверждено" if curr.is_sold else "Не подтверждено"
-            deals += [[deal.product, title, user.name, user.surname, deal.date, check]]
+            accept = True if curr.owner == current_user.id and check == "Не подтверждено" else False
+            deals += [[deal.product, title, user.name, user.surname,
+                       deal.date, check, accept, deal.id]]
     return render_template("account.html", current_user=current_user, session=session,
                            Product=Products.Product, Deal=Deals.Deal, User=Users.User,
                            account=current_user, enumerate=enumerate, deals=deals)
