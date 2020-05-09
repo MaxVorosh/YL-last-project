@@ -8,7 +8,11 @@
     <h3>Описание:</h3> <p>{{ product.description }}</p>
     {% set id = product.id|string %}
     {% set path = "\\static\\image\\products\\" + id + ".jpg" %}
-    <img src={{path}} alt="Здесь должна была быть картинка, но не нашлась"><br>
+    <div class="form-group">
+        <div class="card" style="width: 18rem;">
+            <img src={{path}} alt="здесь должна была быть картинка, но не нашлась"><br>
+        </div>
+    </div>
     <h4>Предлагаемая цена - {{ money }} руб.</h4>
     {{ form.yes(class="btn btn-success") }}
     {{ form.no(class="btn btn-danger") }}

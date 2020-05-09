@@ -69,10 +69,15 @@ def accept_deal(deal_id):
         # владельца продукта.
         prod.is_sold = True  # Товар помечается как проданный.
         session.commit()  # Коммит в базу данных.
-        for deal in current_user.deals.split(';'):  # Перебор всех сделок владельца.
-            deal = session.query(Deals.Deal).get(int(deal))  # Получение сделки.
-            if deal.product == prod.id:  # Если объект сделки тот же, что и в закончившемся аукционе.
-                session.delete(deal)  # Сделка удаляется.
+        ddeals = current_user.deals.split(';')
+        for ddeal in ddeals:  # Перебор всех сделок владельца.
+            if int(ddeal) == deal.id:
+                continue
+            ddeal = session.query(Deals.Deal).get(int(ddeal))  # Получение сделки.
+            if ddeal.product == prod.id:  # Если объект сделки тот же, что и в закончившемся аукционе
+                session.delete(ddeal)  # Сделка удаляется.
+            current_user.deals = ";".join([i for i in current_user.deals.split(';') if i != ddeal])
+        session.commit()
         auc = session.query(Auctions.Auction).get(prod.id)  # Поиск аукциона по товару.
         if auc is not None:  # Если аукцион по товару существует.
             session.delete(auc)  # Удаление аукциона.
@@ -277,10 +282,14 @@ def close_auction(auc_id):
             win.deals = str(deal.id)
         # сделки.
         session.delete(auc)  # Удаление аукциона.
-        for deal in user.deals.split(';'):  # Перебор всех сделок владельца.
-            deal = session.query(Deals.Deal).get(int(deal))  # Получение сделки.
-            if deal.product == prod.id:  # Если объект сделки тот же, что и в закончившемся аукционе.
-                session.delete(deal)  # Сделка удаляется.
+        ddeals = user.deals.split(';')
+        for ddeal in ddeals:  # Перебор всех сделок владельца.
+            if int(ddeal) == deal.id:
+                continue
+            ddeal = session.query(Deals.Deal).get(int(ddeal))  # Получение сделки.
+            if ddeal.product == prod.id:  # Если объект сделки тот же, что и в закончившемся аукционе
+                session.delete(ddeal)  # Сделка удаляется.
+            user.deals = ";".join([i for i in user.deals.split(';') if i != ddeal])
         session.commit()
         return redirect(f"/product/{prod.id}")  # Перенаправление на страницу товара.
     return render_template("close_auction.html", message='', current_user=current_user, form=form,
