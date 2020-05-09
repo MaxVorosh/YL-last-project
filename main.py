@@ -125,7 +125,8 @@ def account():
                        deal.date, check, accept, deal.id]]  # Добавление в список сделок информации.
     return render_template("account.html", current_user=current_user, session=session,
                            Product=Products.Product, Deal=Deals.Deal, User=Users.User,
-                           account=current_user, enumerate=enumerate, deals=deals)  # Отображение.
+                           account=current_user, enumerate=enumerate, deals=deals,
+                           len=len)  # Отображение.
 
 
 @app.route("/account/<int:acc_id>")
@@ -167,8 +168,8 @@ def add_product():
         photo.save(f"static/image/products/{products}.jpg")  # Сохранение фотографии.
         user = session.query(Users.User).filter(current_user.id == Users.User.id).first()
         # Получение текущего пользователя.
-        if user.products and user.product != "":  # Если у него есть продукты.
-            user.products += '; ' + products  # Добавление к ним id продукта через разделитель.
+        if user.products and user.products != "":  # Если у него есть продукты.
+            user.products += ';' + products  # Добавление к ним id продукта через разделитель.
         else:  # В ином случае.
             user.products += products  # Просто добавление id.
         session.commit()  # Коммит в базу данных.
