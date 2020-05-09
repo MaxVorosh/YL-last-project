@@ -107,7 +107,7 @@ def account():
     deals = []  # Список для сделок, которые есть у пользователя.
     if current_user.deals is not None and current_user.deals.strip() != "":  # Проверка того, есть
         # ли у пользователя сделки.
-        for deal in current_user.deals.split(";"):  # Перебор каждой сделки.
+        for deal in current_user.deals.split(";")[::-1]:  # Перебор каждой сделки.
             deal = session.query(Deals.Deal).filter(Deals.Deal.id == deal).first()  # Нахождение
             # сделки в базе данных.
             curr = session.query(Products.Product).filter(
@@ -342,7 +342,7 @@ def inventory():
     Инвентарь пользователя.
     """
     session = db_session.create_session()
-    inv = session.query(Products.Product).filter(Products.Product.owner == current_user.id)
+    inv = session.query(Products.Product).filter(Products.Product.owner == current_user.id)[::-1]
     inv = list(
         map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), inv))
     return render_template('inventory.html', current_user=current_user, inventory=inv)
