@@ -13,8 +13,8 @@ class LoginForm(FlaskForm):
 
 class RegistrationForm(FlaskForm):
     login = StringField("Логин (email)", validators=[DataRequired()])
-    password = PasswordField("Пароль", validators=[DataRequired()])
-    confirm_password = PasswordField("Повтор пароля", validators=[DataRequired()])
+    password = PasswordField("Пароль")
+    confirm_password = PasswordField("Повтор пароля")
     name = StringField("Имя", validators=[DataRequired()])
     surname = StringField("Фамилия", validators=[DataRequired()])
     photo = FileField(

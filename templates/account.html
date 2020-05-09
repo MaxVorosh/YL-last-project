@@ -19,15 +19,14 @@
     <label>Счёт:</label>
     <p>{{ current_user.money }} руб.</p>
 </div>
-{% if current_user.photo != "" %}
-<div style="position: absolute; right: 0px; top: 0px;">
-    <img src="static/image/users/{{ current_user.email }}.{{ current_user.photo }}" width="50%"
-         height="50%">
+{% if current_user.photo != "" and current_user.photo is not none %}
+<div class="card" style="width: 18rem;">
+    <img src="static/image/users/{{ current_user.email }}.{{ current_user.photo }}">
 </div>
+{% endif %}
 <div class="form-group">
     <a href="/edit_profile">Отредактировать профиль</a>
 </div>
-{% endif %}
 <h2>Предметы</h2>
 {% if current_user.products == "" %}
 <h3>Товаров нет</h3>
@@ -35,11 +34,11 @@
 {% else %}
 <a href="/add_product" class="btn btn-warning">Добавить товар</a><br/><br/><br/>
 <div class="card-columns">
-    {% for item in current_user.products.split(";") %}
+    {% for item in products %}
     {% set item = session.query(Product).filter(Product.id == item).first() %}
     {% if item.is_sold == 0 %}
     <div class="card" style="width: 18rem; background-color: rgba(255, 204, 0, 0.5)">
-        <img src="/static/image/products/{{ item.id }}.jpg" class="card-img-top">
+        <img src="static/image/products/{{ item.id }}.jpg" class="card-img-top">
         <div class="card-body">
             <h5 class="card-title">{{ item.title }}</h5>
             <p class="card-text">{{ item.text }}</p>

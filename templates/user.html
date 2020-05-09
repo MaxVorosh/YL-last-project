@@ -15,18 +15,19 @@
     <label>Email пользователя: </label>
     <p>{{ user.email }}</p>
 </div>
-{% if user.photo != "" %}
-	<div style="position: absolute; right: 0px; top: 0px;">
-    	<img src="static/image/users/{{ user.email }}.{{ user.photo }}" width="50%" height="50%">
-	</div>
+{% if user.photo != "" and user.photo is not none %}
+<div class="card" style="width: 18rem;">
+    <img src="/static/image/users/{{ user.email }}.{{ user.photo }}">
+</div>
 {% endif %}
 <h2>Предметы</h2>
-{% if user.products == "" %}
+{% if user.products == "" or user.products is none%}
 <h3>Товаров нет</h3>
 {% else %}
 <div class="card-columns">
-{% for item in user.products.split(";") %}
-{% set item = session.query(Product).filter(Product.id == item).first() %}
+    {% for item in user.products.split(";") %}
+    {% if item.strip() != "" %}
+    {% set item = session.query(Product).filter(Product.id == item).first() %}
     {% if item.is_sold == 0 %}
     <div class="card" style="width: 18rem; background-color: rgba(255, 204, 0, 0.5)">
         <img src="/static/image/products/{{ item.id }}.jpg" class="card-img-top">
@@ -37,7 +38,8 @@
         </div>
     </div>
     {% endif %}
-{% endfor %}
+    {% endif %}
+    {% endfor %}
 </div>
 {% endif %}<br/>
 {% endblock %}
