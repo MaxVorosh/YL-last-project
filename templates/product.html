@@ -9,7 +9,14 @@
 {% elif current_user.is_authenticated == 0 %}
 <h4>Войдите на сайт</h4>
 {% else %}
+{% if auction == -1%}
 <a href="/make_deal/{{ product.id }}" class="btn btn-warning">Приобрести товар</a><br/>
+или<br/>
+<a href="/new_auction/{{ product.id }}" class="btn btn-warning">Начать укцион</a>
+{% else %}
+<h4>В настоящее время проходит аукцион.</h4>
+<a href="/buy/{{ product.id }}" class="btn btn-warning">Принять участие</a>
+{% endif %}
 {% endif %}
 <div style="position: absolute; right: 0px; top: 0px;">
     <img src="/static/image/products/{{ product.id }}.jpg">

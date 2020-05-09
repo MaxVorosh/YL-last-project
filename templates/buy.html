@@ -11,17 +11,23 @@
         <div>
             {{ form.csrf_token }}
         </div>
-        <h3>{{ product.title }}</h3>
-        <h6>{{ product.description }}</h6>
+        <h1>Сделать ставку</h1>
+        <h2>{{ product.title }}</h2>
+        <div class="form-group">
+            <h3>Описание: </h3><h6>{{ product.description }}</h6>
+        </div>
         {% set id = product.id|string %}
         {% set path = "\\static\\image\\products\\" + id + ".jpg" %}
-        <img src={{path}} alt="здесь должна была быть картинка, но не нашлась"><br>
-        {{ form.cost.label() }}
-        {{ form.cost() }}<br>
-        {% for error in form.cost.errors %}
-            <h6>{{ error }}</h6>
-        {% endfor %}
-        {{ form.submit.label() }}
-        {{ form.submit() }}
+        <div class="form-group">
+            <img src={{path}} alt="здесь должна была быть картинка, но не нашлась"><br>
+        </div>
+        <div class="form-group">
+            <label for="cost">{{ form.cost.label() }}</label>
+            {{ form.cost(class="form-control", id="cost") }}
+            {% for error in form.cost.errors %}
+                <h6>{{ error }}</h6>
+            {% endfor %}
+        </div>
+        {{ form.submit(class="btn btn-warning") }}
     </form>
 {% endblock %}

@@ -290,6 +290,8 @@ def make_deal(deal_id):
     curr_product = session.query(Products.Product).get(deal_id)
     owner = session.query(Users.User).get(curr_product.owner)
     cur = session.query(Users.User).get(current_user.id)
+    if session.query(Auctions.Auction).get(curr_product.id) is not None:
+        return redirect(f"/product/{deal_id}")
     form = DealForm()
     if form.validate_on_submit():
         if cur.money >= form.cost.data >= 0:
@@ -351,6 +353,26 @@ def new_auction():
                            inventory=[])
 
 
+@app.route("/new_auction/<int:pr_id>")
+@login_required
+def new_auction_product(pr_id):
+    session = db_session.create_session()
+    curr = session.query(Products.Product).get(pr_id)
+    if curr.is_sold == 1:
+        return redirect(f"/product/{pr_id}")
+    auction = session.query(Auctions.Auction).get(pr_id)
+    if auction is not None:
+        return redirect(f"/buy/{pr_id}")
+    auction = Auctions.Auction()
+    auction.id = pr_id
+    auction.product = auction.id
+    auction.participants = ""
+    auction.history = "0"
+    session.add(auction)
+    session.commit()
+    return redirect(f"/product/{pr_id}")
+
+
 @app.route("/product/<int:pr_id>")
 def product(pr_id):
     session = db_session.create_session()
@@ -358,7 +380,11 @@ def product(pr_id):
     if pr is None:
         return redirect("/")
     owner = session.query(Users.User).get(pr.owner)
-    return render_template("product.html", product=pr, owner=owner, current_user=current_user)
+    auction = session.query(Auctions.Auction).get(pr_id)
+    if auction is None:
+        auction = -1
+    return render_template("product.html", product=pr, owner=owner, current_user=current_user,
+                           auction=auction)
 
 
 @app.route("/register", methods=["GET", "POST"])
