@@ -254,7 +254,11 @@ def close_auction(auc_id):
         # страницу победителя.
         user.money += win_money  # Перечисление владельцу финальной суммы.
         deal = Deals.Deal()  # Создание класса сделки.
-        deal.id = session.query(Deals.Deal).all()[-1].id + 1  # ID сделки.
+        deals = session.query(Deals.Deal).all()
+        if len(deals) != 0:
+            deal.id = session.query(Deals.Deal).all()[-1].id + 1  # ID сделки.
+        else:
+            deal.id = 1
         deal.participants = ';'.join([str(current_user.id), str(last)])  # Добавление в сделку
         # победителя и продавца.
         deal.product = prod.id  # Добавление в сделку объекта.
@@ -262,12 +266,17 @@ def close_auction(auc_id):
         deal.history = win_money  # История сделки состоит только из победной суммы.
         deal.date = datetime.datetime.now()  # Обновление даты.
         session.add(deal)  # Добавление сделки.
-        user.deal = ';'.join(user.deal.split(';') + [str(deal.id)])  # Добавление к текущему
+        if user.deals is not None:
+            user.deals = ';'.join(user.deals.split(';') + [str(deal.id)])  # Добавление к текущему
+        else:
+            user.deals = str(deal.id)
         # пользователю новой сделки.
-        win.deal = ';'.join(win.deal.split(';') + [str(deal.id)])  # Добавление к продавцу новой
+        if win.deals is not None:
+            win.deals = ';'.join(win.deals.split(';') + [str(deal.id)])  # Добавление к текущему
+        else:
+            win.deals = str(deal.id)
         # сделки.
         session.delete(auc)  # Удаление аукциона.
-        session.commit()  # Коммит в базу данных.
         for deal in user.deals.split(';'):  # Перебор всех сделок владельца.
             deal = session.query(Deals.Deal).get(int(deal))  # Получение сделки.
             if deal.product == prod.id:  # Если объект сделки тот же, что и в закончившемся аукционе.

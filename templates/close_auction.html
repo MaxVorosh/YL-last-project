@@ -1,15 +1,23 @@
 {% extends "base.html" %}
 
 {% block content %}
-<form action="" method="post" novalidate
-          enctype = "multipart/form-data">
-    {{ product.title }}<br>
-    {{ product.description }}<br>
+<form action="" method="post" novalidate enctype = "multipart/form-data">
+    <h2>{{ product.title }}</h2><br>
+    <div class="form-group">
+        <h3>Описание:</h3> <p>{{ product.description }}</p>
+    </div>
     {% set id = product.id|string %}
     {% set path = "\\static\\image\\products\\" + id + ".jpg" %}
-    <img src={{path}} alt="здесь должна была быть картинка, но не нашлась"><br>
-    <h4>Текущая ставка - {{ money }}</h4>
-    {{ form.submit.label() }}
-    {{ form.submit() }}
+    <div class="form-group">
+        <div class="card" style="width: 18rem;">
+            <img src={{path}} alt="здесь должна была быть картинка, но не нашлась"><br>
+        </div>
+    </div>
+    <div class="form-group">
+        <h4>Текущая ставка - {{ money }}</h4>
+    </div>
+    <div class="form-group">
+        {{ form.submit(class="btn btn-success") }}
+    </div>
 </form>
 {% endblock %}

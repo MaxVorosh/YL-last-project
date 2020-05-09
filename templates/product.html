@@ -2,26 +2,39 @@
 {% block content %}
 <h1>Страница продукта</h1>
 <h2>{{ product.title }}</h2>
+<div class="form-group">
 {% if product.is_sold == 1 %}
 <h3>Товар продан</h3>
 {% elif owner.id == current_user.id %}
+{% if auction == -1 %}
 <h4>Вы владелец</h4>
+{% else %}
+<h3>Последняя ставка на аукционе: {{ auction.history.split(";")[-1] }} руб.</h3>
+<a href="/close_auction/{{ product.id }}" class="btn btn-warning">Закрыть аукцион</a>
+{% endif %}
 {% elif current_user.is_authenticated == 0 %}
 <h4>Войдите на сайт</h4>
 {% else %}
 {% if auction == -1%}
 <a href="/make_deal/{{ product.id }}" class="btn btn-warning">Приобрести товар</a><br/>
 или<br/>
-<a href="/new_auction/{{ product.id }}" class="btn btn-warning">Начать укцион</a>
+<a href="/new_auction/{{ product.id }}" class="btn btn-warning">Начать аукцион</a>
 {% else %}
 <h4>В настоящее время проходит аукцион.</h4>
 <a href="/buy/{{ product.id }}" class="btn btn-warning">Принять участие</a>
 {% endif %}
 {% endif %}
-<div class="card" style="width: 18rem;">
-    <img src="/static/image/products/{{ product.id }}.jpg">
 </div>
-<h3>Описание:</h3> <p>{{ product.description }}</p>
+<div class="form-group">
+    <div class="card" style="width: 18rem;">
+        <img src="/static/image/products/{{ product.id }}.jpg">
+    </div>
+</div>
+<div class="form-group">
+    <h3>Описание:</h3> <p>{{ product.description }}</p>
+</div>
+<div class="form-group">
 <h3>Владелец</h3>
 <a href="/account/{{ product.owner }}" class="btn btn-light">{{ owner.name }} {{ owner.surname }}</a>
+</div>
 {% endblock %}
