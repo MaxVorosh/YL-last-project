@@ -625,4 +625,4 @@ def search():
 
 if __name__ == "__main__":  # Проверка прямого запуска.
     db_session.global_init("db/database.sqlite")  # Инициализация базы данных.
-    app.run(port=int(os.environ.get("PORT", 5000)))  # Запуск программы.
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))  # Запуск программы.
