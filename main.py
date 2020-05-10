@@ -31,6 +31,11 @@ login_manager = LoginManager()  # Менеджер для Flask-login.
 login_manager.init_app(app)  # Инициализация.
 
 
+@app.errorhandler(401)
+def unauthorized(error):
+    return render_template('no_access.html'), 401
+
+
 @app.route("/")
 @app.route("/index")
 def index():
@@ -314,9 +319,9 @@ def edit_profile():
         if form.surname.data == "":  # Если введена пустая фамилия.
             return render_template("edit_profile.html", message="Необходимо ввести фамилию",
                                    form=form, current_user=current_user)  # Предупреждение.
-        if form.login.data == "":
+        if form.login.data == "":  # Проверка ввода логина.
             return render_template("edit_profile.html", message="Необходимо ввести логин (почту)",
-                                   current_user=current_user, form=form)
+                                   current_user=current_user, form=form)  # Предупреждение.
         if form.password.data == "":  # Если введённый пароль пуст.
             return render_template("edit_profile.html", message="Необходимо ввести пароль",
                                    form=form, current_user=current_user)  # Перенаправление на
@@ -435,31 +440,34 @@ def make_deal(deal_id):
         if cur.money >= cost >= 0:  # Если денег хватает, и введённая сумма больше 0,
             deal = Deals.Deal()  # Создание сделки.
             deal.product = curr_product.id  # Обозначение объекта сделки.
-            deal.participants = ';'.join([str(owner.id), str(cur.id)])
-            deal.history = str(form.cost.data)
-            deal.date = datetime.datetime.now()
-            cur.money -= cost
-            session.add(deal)
-            session.commit()
+            deal.participants = ';'.join([str(owner.id), str(cur.id)])  # Добавление участников.
+            deal.history = str(form.cost.data)  # Добавление истории сделки.
+            deal.date = datetime.datetime.now()  # Постановка времени.
+            cur.money -= cost  # Отчисление денег в залог.
+            session.add(deal)  # Добавление сделки.
             owner.deals = ';'.join(owner.deals.split(';') + [
-                str(deal.id)]) if owner.deals else str(deal.id)
+                str(deal.id)]) if owner.deals else str(deal.id)  # Добавление сделки владельцу.
             cur.deals = ';'.join(
-                cur.deals.split(';') + [str(deal.id)]) if cur.deals else str(deal.id)
-            session.commit()
-            return redirect(f"/product/{curr_product.id}")
-        elif cost < 0:
+                cur.deals.split(';') + [str(deal.id)]) if cur.deals else str(deal.id)  # Добалвение
+            # сделки пользователю.
+            session.commit()  # Коммит в базу данных..
+            return redirect(f"/product/{curr_product.id}")  # Перенаправление на страницу товара.
+        elif cost < 0:  # Если же стоимость ниже 0.
             return render_template("Deal.html", form=form, product=curr_product, owner=owner,
-                                   message="Это не нефть.")
-        else:
+                                   message="Это не нефть.")  # Предупреждение.
+        else:  # В ином случае.
             return render_template("Deal.html", form=form, product=curr_product, owner=owner,
-                                   message="У вас нет такого числа денег")
+                                   message="У вас нет такого числа денег")  # Предупреждение.
     return render_template("Deal.html", form=form, product=curr_product, owner=owner, message="")
 
 
 @app.route("/new_auction", methods=["GET", "POST"])
 @login_required
 def new_auction():
-    form = AuctionForm()
+    """
+    Начало нового аукциона.
+    """
+    form = AuctionForm()  #
     if form.search.data and form.product.data:
         session = db_session.create_session()
         good = session.query(Products.Product).filter(
@@ -595,4 +603,4 @@ def search():
 
 if __name__ == "__main__":
     db_session.global_init("db/database.sqlite")
-    app.run()
+    app.run(host="192.168.0.103")
