@@ -461,71 +461,40 @@ def make_deal(deal_id):
     return render_template("Deal.html", form=form, product=curr_product, owner=owner, message="")
 
 
-@app.route("/new_auction", methods=["GET", "POST"])
-@login_required
-def new_auction():
-    """
-    Начало нового аукциона.
-    """
-    form = AuctionForm()  #
-    if form.search.data and form.product.data:
-        session = db_session.create_session()
-        good = session.query(Products.Product).filter(
-            Products.Product.lower.like(f"%{form.product.data.lower()}%"),
-            Products.Product.is_sold == 0)
-        inv = list(
-            map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), good))
-        return render_template("AddAuction.html", message='', current_user=current_user, form=form,
-                               inventory=inv)
-    if form.submit.data and form.product.data and form.number.data:
-        session = db_session.create_session()
-        good = session.query(Products.Product).filter(Products.Product.lower.like(
-            f"%{form.product.data.lower()}%"), Products.Product.is_sold == 0)
-        try:
-            auction = Auctions.Auction()
-            auction.id = good[form.number.data - 1].id
-            auction.product = auction.id
-            auction.participants = ""
-            auction.history = "0"
-            session.add(auction)
-            session.commit()
-            return redirect("/")
-        except Exception as error:
-            print(error)
-            return render_template("AddAuction.html", message='Введите действительный номер',
-                                   current_user=current_user,
-                                   form=form, inventory=[])
-    return render_template("AddAuction.html", message='', current_user=current_user, form=form,
-                           inventory=[])
-
-
 @app.route("/new_auction/<int:pr_id>")
 @login_required
 def new_auction_product(pr_id):
-    session = db_session.create_session()
-    curr = session.query(Products.Product).get(pr_id)
-    if curr.is_sold == 1:
-        return redirect(f"/product/{pr_id}")
-    auction = session.query(Auctions.Auction).get(pr_id)
-    if auction is not None:
-        return redirect(f"/buy/{pr_id}")
-    auction = Auctions.Auction()
-    auction.id = pr_id
-    auction.product = auction.id
-    auction.participants = ""
-    auction.history = "0"
-    session.add(auction)
-    session.commit()
-    return redirect(f"/product/{pr_id}")
+    """
+    Добавление аукциона вокруг товара.
+    """
+    session = db_session.create_session()  # Создание сессии.
+    curr = session.query(Products.Product).get(pr_id)  # Получение продукта.
+    if curr.is_sold == 1:  # Если продукт продан.
+        return redirect(f"/product/{pr_id}")  # Перенаправление на страницу товара.
+    auction = session.query(Auctions.Auction).get(pr_id)  # Получение аукциона.
+    if auction is not None:  # Если аукцион существует.
+        return redirect(f"/buy/{pr_id}")  # Перенаправление на страницу товара.
+    auction = Auctions.Auction()  # Создание аукциона.
+    auction.id = pr_id  # Установка id.
+    auction.product = auction.id  # Установка продукта.
+    auction.participants = ""  # Установка участников.
+    auction.history = "0"  # Установка истории.
+    session.add(auction)  # Добавление аукциона.
+    session.commit()  # Коммит в базу данных.
+    return redirect(f"/product/{pr_id}")  # Перенаправление на страницу товара.
 
 
 @app.route("/product/<int:pr_id>")
 def product(pr_id):
-    session = db_session.create_session()
-    pr = session.query(Products.Product).filter(Products.Product.id == pr_id).first()
-    if pr is None:
-        return redirect("/")
-    owner = session.query(Users.User).get(pr.owner)
+    """
+    Страница продукта.
+    """
+    session = db_session.create_session()  # Создание сессии.
+    pr = session.query(Products.Product).filter(Products.Product.id == pr_id).first()  # Получение
+    # продукта.
+    if pr is None:  # Если товар отсутствует.
+        return redirect("/search")  # Перенаправление на страницу поиска.
+    owner = session.query(Users.User).get(pr.owner)  #
     auction = session.query(Auctions.Auction).get(pr_id)
     if auction is None:
         auction = -1

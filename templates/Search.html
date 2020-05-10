@@ -28,10 +28,14 @@
             <div class="form-group">
                 <h3>{{obj.title}}</h3>
                 <h6>{{obj.description}}</h6>
-                <div class="card" style="width: 18rem;">
-                    <img src={{path}} alt="здесь должна была быть картинка, но не нашлась">
+                <div class="form-group">
+                    <div class="card" style="width: 18rem;">
+                        <img src={{path}} alt="здесь должна была быть картинка, но не нашлась">
+                    </div>
                 </div>
-                <br>
+                <div class="form-group">
+                    <a href="/product/{{ obj.id }}" class="btn btn-warning">Страница товара</a>
+                </div><hr/>
             </div>
         {% endfor %}
         <div class="form-group">
