@@ -1,5 +1,5 @@
-from data.forms import RegistrationForm, LoginForm, AddProductForm, AuctionForm, SearchForm, BuyForm
 from flask_login import login_user, logout_user, current_user, LoginManager, login_required
+from data.forms import RegistrationForm, LoginForm, AddProductForm, SearchForm, BuyForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from data import db_session, Users, Products, Auctions, Deals
 from data.forms import DealForm, CloseForm, AcceptForm
@@ -169,6 +169,9 @@ def add_product():
     form = AddProductForm()  # Форма.
     if form.validate_on_submit():  # При подтверждении.
         session = db_session.create_session()  # Создание сессии.
+        if form.photo.data.filename == "" or form.photo.data is None:
+            return render_template("AddProduct.html", message="Необходимо добавить фотографию",
+                                   current_user=current_user, form=form)
         photo = form.photo.data  # Получение фото из формы.
         product_to_add = Products.Product()  # Создание класса продукта.
         product_to_add.title = form.title.data  # Добавление названия.
@@ -341,6 +344,34 @@ def delete(product_id):
     # Удаление товара у пользователя.
     session.commit()  # Коммит в базу данных.
     return redirect("/account")  # Перенаправление на страницу пользователя.
+
+
+@app.route("/edit_product/<int:product_id>", methods=["GET", "POST"])
+def edit_product(product_id):
+    """
+    Изменение товара.
+    """
+    session = db_session.create_session()  # Создание сессии.
+    curr_product = session.query(Products.Product).get(product_id)  # Получение текущего товара.
+    if curr_product is None:  # Если товар отсутствуе.
+        return redirect("/search")  # Перенаправление на страницу поиска.
+    if not current_user.is_authenticated or current_user.id != curr_product.owner:  # Если
+        # пользователь не авторизован или не является владельцем.
+        return redirect(f"/product/{product_id}")  # Перенаправление на страницу товара.
+    form = AddProductForm()  # Создание формы.
+    form.title.data = curr_product.title
+    form.description.data = curr_product.description
+    if form.validate_on_submit():  # При подтверждении.
+        if form.photo.data != "" and form.photo.data is not None:
+            photo = form.photo.data  # Получение фото из формы.
+            photo.save(f"static/image/products/{product_id}.jpg")  # Сохранение фотографии.
+        curr_product.title = form.title.data  # Добавление названия.
+        curr_product.description = form.description.data  # Добавление описания.
+        curr_product.lower = curr_product.title.lower()  # Добавление поля для поиска продукта.
+        session.commit()  # Коммит в базу данных.
+        return redirect("/account")  # Переход на страницу пользователя.
+    return render_template("AddProduct.html", message="Фотографию загружать необязательно",
+                           current_user=current_user, form=form)
 
 
 @app.route("/edit_profile", methods=["GET", "POST"])

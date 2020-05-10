@@ -1,6 +1,11 @@
 {% extends "base.html" %}
 
 {% block content %}
+{% if message != "" %}
+    <div class="alert alert-danger" role="alert">
+        {{ message }}
+    </div>
+{% endif %}
 <h1>Добавление товара</h1>
 <form action="" method="post" novalidate enctype = "multipart/form-data">
     {{ form.hidden_tag() }}

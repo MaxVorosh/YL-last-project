@@ -18,7 +18,7 @@ class RegistrationForm(FlaskForm):
     name = StringField("Имя")
     surname = StringField("Фамилия")
     photo = FileField(
-        "Фотография (не обязательно) (советуется квадратную)",
+        "Фотография (не обязательно)",
         validators=[FileAllowed(['jpg', 'png', 'jpeg'],
                                 "Файл должен быть одного из этих форматов: 'jpg', 'png', 'jpeg'")])
     submit = SubmitField("Отправить")
@@ -29,8 +29,7 @@ class AddProductForm(FlaskForm):
     description = StringField("Описание", validators=[DataRequired()])
     photo = FileField(
         "Изображение",
-        validators=[FileRequired(),
-                    FileAllowed(['jpg', 'png', 'jpeg'],
+        validators=[FileAllowed(['jpg', 'png', 'jpeg'],
                                 "Файл должен быть одного из этих форматов: 'jpg', 'png', 'jpeg'")])
     submit = SubmitField("Подтвердить")
 
