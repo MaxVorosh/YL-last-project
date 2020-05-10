@@ -50,7 +50,6 @@ pycodestyle==2.5.0
 pycparser==2.20
 pydocstyle==5.0.2
 pyflakes==2.1.1
-pygame==1.9.6
 pylint==2.4.4
 pyparsing==2.4.7
 PyQt5==5.14.1
