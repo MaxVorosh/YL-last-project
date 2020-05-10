@@ -12,11 +12,11 @@ class LoginForm(FlaskForm):
 
 
 class RegistrationForm(FlaskForm):
-    login = StringField("Логин (email)", validators=[DataRequired()])
+    login = StringField("Логин (email)")
     password = PasswordField("Пароль")
     confirm_password = PasswordField("Повтор пароля")
-    name = StringField("Имя", validators=[DataRequired()])
-    surname = StringField("Фамилия", validators=[DataRequired()])
+    name = StringField("Имя")
+    surname = StringField("Фамилия")
     photo = FileField(
         "Фотография (не обязательно) (советуется квадратную)",
         validators=[FileAllowed(['jpg', 'png', 'jpeg'],
@@ -55,7 +55,7 @@ class BuyForm(FlaskForm):
 
 
 class DealForm(FlaskForm):
-    cost = IntegerField("Предлагаемая цена (обязательное поле)")
+    cost = StringField("Предлагаемая цена (обязательное поле)")
     submit = SubmitField("Отправить запрос")
 
 

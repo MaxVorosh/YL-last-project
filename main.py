@@ -71,13 +71,14 @@ def accept_deal(deal_id):
         session.commit()  # Коммит в базу данных.
         ddeals = current_user.deals.split(';')
         for ddeal in ddeals:  # Перебор всех сделок владельца.
-            if int(ddeal) == deal.id:
-                continue
+            if int(ddeal) == deal.id:  # Если id совпадают.
+                continue  # Пропуск.
             ddeal = session.query(Deals.Deal).get(int(ddeal))  # Получение сделки.
             if ddeal.product == prod.id:  # Если объект сделки тот же, что и в закончившемся аукционе
                 session.delete(ddeal)  # Сделка удаляется.
             current_user.deals = ";".join([i for i in current_user.deals.split(';') if i != ddeal])
-        session.commit()
+            # Обновление списка сделок.
+        session.commit()  # Коммит в базу данных.
         auc = session.query(Auctions.Auction).get(prod.id)  # Поиск аукциона по товару.
         if auc is not None:  # Если аукцион по товару существует.
             session.delete(auc)  # Удаление аукциона.
@@ -259,11 +260,11 @@ def close_auction(auc_id):
         # страницу победителя.
         user.money += win_money  # Перечисление владельцу финальной суммы.
         deal = Deals.Deal()  # Создание класса сделки.
-        deals = session.query(Deals.Deal).all()
-        if len(deals) != 0:
+        deals = session.query(Deals.Deal).all()  # Перебор всех сделок.
+        if len(deals) != 0:  # Если они есть.
             deal.id = session.query(Deals.Deal).all()[-1].id + 1  # ID сделки.
-        else:
-            deal.id = 1
+        else:  # Если сделок нет.
+            deal.id = 1  # Просто приравнивается №1.
         deal.participants = ';'.join([str(current_user.id), str(last)])  # Добавление в сделку
         # победителя и продавца.
         deal.product = prod.id  # Добавление в сделку объекта.
@@ -271,26 +272,26 @@ def close_auction(auc_id):
         deal.history = win_money  # История сделки состоит только из победной суммы.
         deal.date = datetime.datetime.now()  # Обновление даты.
         session.add(deal)  # Добавление сделки.
-        if user.deals is not None:
+        if user.deals is not None and user.deals != "":  # Если сделки пользователя не пусты.
             user.deals = ';'.join(user.deals.split(';') + [str(deal.id)])  # Добавление к текущему
-        else:
-            user.deals = str(deal.id)
+        else:  # В ином случае.
+            user.deals = str(deal.id)  # Просто добавление 1.
         # пользователю новой сделки.
-        if win.deals is not None:
+        if win.deals is not None and win.deals != "":  # Если сделки победителя не пусты.
             win.deals = ';'.join(win.deals.split(';') + [str(deal.id)])  # Добавление к текущему
-        else:
-            win.deals = str(deal.id)
+        else:  # В ином случае.
+            win.deals = str(deal.id)  # Просто приравнивание.
         # сделки.
         session.delete(auc)  # Удаление аукциона.
-        ddeals = user.deals.split(';')
+        ddeals = user.deals.split(';')  # Получение всех сделок пльзователя.
         for ddeal in ddeals:  # Перебор всех сделок владельца.
-            if int(ddeal) == deal.id:
-                continue
+            if int(ddeal) == deal.id:  # Если заключенная ранее сделка -- та, которая попалась.
+                continue  # Пропуск.
             ddeal = session.query(Deals.Deal).get(int(ddeal))  # Получение сделки.
             if ddeal.product == prod.id:  # Если объект сделки тот же, что и в закончившемся аукционе
                 session.delete(ddeal)  # Сделка удаляется.
             user.deals = ";".join([i for i in user.deals.split(';') if i != ddeal])
-        session.commit()
+        session.commit()  # Коммит в базу данных.
         return redirect(f"/product/{prod.id}")  # Перенаправление на страницу товара.
     return render_template("close_auction.html", message='', current_user=current_user, form=form,
                            product=prod, money=win_money)  # Страница закрытия аукциона.
@@ -307,6 +308,19 @@ def edit_profile():
     user = session.query(Users.User).get(current_user.id)  # Получение пользователя.
     form = RegistrationForm()  # Создание формы.
     if form.validate_on_submit():  # При подтверждении.
+        if form.name.data == "":  # Проверка имени.
+            return render_template("edit_profile.html", message="Необходимо ввести имя",
+                                   current_user=current_user, form=form)  # Предупреждение.
+        if form.surname.data == "":  # Если введена пустая фамилия.
+            return render_template("edit_profile.html", message="Необходимо ввести фамилию",
+                                   form=form, current_user=current_user)  # Предупреждение.
+        if form.login.data == "":
+            return render_template("edit_profile.html", message="Необходимо ввести логин (почту)",
+                                   current_user=current_user, form=form)
+        if form.password.data == "":  # Если введённый пароль пуст.
+            return render_template("edit_profile.html", message="Необходимо ввести пароль",
+                                   form=form, current_user=current_user)  # Перенаправление на
+        # страницу с предупреждением.
         if form.password.data == "":  # Если введённый пароль пуст.
             return render_template("edit_profile.html", message="Необходимо ввести пароль",
                                    form=form, current_user=current_user)  # Перенаправление на
@@ -341,61 +355,90 @@ def inventory():
     """
     Инвентарь пользователя.
     """
-    session = db_session.create_session()
+    session = db_session.create_session()  # Создание сессии.
     inv = session.query(Products.Product).filter(Products.Product.owner == current_user.id)[::-1]
+    # Получение всех предметов.
     inv = list(
-        map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), inv))
-    return render_template('inventory.html', current_user=current_user, inventory=inv)
+        map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), inv))  # Получение
+    # изображений.
+    return render_template('inventory.html', current_user=current_user, inventory=inv)  # Отображение
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    session = db_session.create_session()
-    return session.query(Users.User).get(user_id)
+    """
+    Загрузка пользователя. Flask-login.
+    """
+    session = db_session.create_session()  # Создани сессии.
+    return session.query(Users.User).get(user_id)  # Возвращение пользователя.
 
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        session = db_session.create_session()
+    """
+    Вход в аккаунт.
+    """
+    form = LoginForm()  # Создание формы.
+    if form.validate_on_submit():  # При подтверждении формы.
+        if form.login.data == "":  # Если логин пользователя пуст.
+            return render_template("login.html", current_user=current_user, form=form,
+                                   message="Необходимо ввести логин.")  # Страница с предупреждением.
+        if form.password.data == "":  # Если пусто поле пароля.
+            return render_template("login.html", current_user=current_user, form=form,
+                                   message="Необходимо ввести пароль.")  # Предупреждение.
+        session = db_session.create_session()  # Создание сессии.
         user = session.query(Users.User).filter(Users.User.email == form.login.data).first()
-        if user is None:
+        # Нахождение пользователя.
+        if user is None:  # Если пользователя с подобный логином нет.
             return render_template("login.html", current_user=current_user, form=form,
                                    message="Пользователя с подобной почтой не существует.")
-        if check_password_hash(user.password, form.password.data):
-            login_user(user, remember=form.remember.data)
-            return redirect("/")
+        # Предупреждение.
+        if check_password_hash(user.password, form.password.data):  # Проверка пароля.
+            login_user(user, remember=form.remember.data)  # Вход.
+            return redirect("/")  # Перенаправление на главную страницу.
         return render_template("login.html", current_user=current_user, form=form,
-                               message="Ложный пароль.")
-    return render_template("login.html", current_user=current_user, form=form, message="")
+                               message="Ложный пароль.")  # Предупреждение.
+    return render_template("login.html", current_user=current_user, form=form, message="")  # Сайт.
 
 
 @app.route("/logout")
 @login_required
 def logout():
-    logout_user()
-    return redirect("/")
+    """
+    Выход пользователя из системы.
+    """
+    logout_user()  # Flask-login выход.
+    return redirect("/")  # Перенаправление на главную страницу.
 
 
 @app.route("/make_deal/<int:deal_id>", methods=["GET", "POST"])
 @login_required
 def make_deal(deal_id):
-    session = db_session.create_session()
-    curr_product = session.query(Products.Product).get(deal_id)
-    owner = session.query(Users.User).get(curr_product.owner)
-    cur = session.query(Users.User).get(current_user.id)
-    if session.query(Auctions.Auction).get(curr_product.id) is not None:
-        return redirect(f"/product/{deal_id}")
-    form = DealForm()
-    if form.validate_on_submit():
-        if cur.money >= form.cost.data >= 0:
-            deal = Deals.Deal()
-            deal.product = curr_product.id
+    """
+    Создание сделки.
+    """
+    session = db_session.create_session()  # Создание сессии.
+    curr_product = session.query(Products.Product).get(deal_id)  # Получение текущего товара.
+    owner = session.query(Users.User).get(curr_product.owner)  # Получение владельца.
+    cur = session.query(Users.User).get(current_user.id)  # Получение текущего пользователя.
+    if session.query(Auctions.Auction).get(curr_product.id) is not None:  # Если есть аукцион на
+        # товар.
+        return redirect(f"/product/{deal_id}")  # Перенаправление на страницу товара.
+    form = DealForm()  # Получение формы сделки.
+    if form.validate_on_submit():  # При подтверждении формы.
+        try:
+            cost = int(form.cost.data)  # Перевод стоимости в число.
+        except Exception as error:  # Если происходит ошибка.
+            print(error)  # Вывод ошибки.
+            return render_template("Deal.html", form=form, product=curr_product, owner=owner,
+                                   message="Необходимо ввести только число.")  # Предупреждение.
+        if cur.money >= cost >= 0:  # Если денег хватает, и введённая сумма больше 0,
+            deal = Deals.Deal()  # Создание сделки.
+            deal.product = curr_product.id  # Обозначение объекта сделки.
             deal.participants = ';'.join([str(owner.id), str(cur.id)])
             deal.history = str(form.cost.data)
             deal.date = datetime.datetime.now()
-            cur.money -= form.cost.data
+            cur.money -= cost
             session.add(deal)
             session.commit()
             owner.deals = ';'.join(owner.deals.split(';') + [
@@ -404,7 +447,7 @@ def make_deal(deal_id):
                 cur.deals.split(';') + [str(deal.id)]) if cur.deals else str(deal.id)
             session.commit()
             return redirect(f"/product/{curr_product.id}")
-        elif form.cost.data < 0:
+        elif cost < 0:
             return render_template("Deal.html", form=form, product=curr_product, owner=owner,
                                    message="Это не нефть.")
         else:
@@ -486,12 +529,21 @@ def product(pr_id):
 def register():
     form = RegistrationForm()
     if form.validate_on_submit():
+        if form.name.data == "":
+            return render_template("register.html", message="Необходимо ввести имя",
+                                   current_user=current_user, form=form)
+        if form.surname.data == "":
+            return render_template("register.html", message="Необходимо ввести фамилию", form=form,
+                                   current_user=current_user)
+        if form.login.data == "":
+            return render_template("register.html", message="Необходимо ввести логин (почту)",
+                                   current_user=current_user, form=form)
         if form.password.data == "":  # Если введённый пароль пуст.
-            return render_template("edit_profile.html", message="Необходимо ввести пароль",
+            return render_template("register.html", message="Необходимо ввести пароль",
                                    form=form, current_user=current_user)  # Перенаправление на
         # страницу с предупреждением.
         if form.password.data != form.confirm_password.data or form.confirm_password.data == "":
-            return render_template("edit_profile.html", message="Пароли не совпадают", form=form,
+            return render_template("register.html", message="Пароли не совпадают", form=form,
                                    current_user=current_user)
         session = db_session.create_session()
         if form.photo.data:
@@ -501,10 +553,6 @@ def register():
         if session.query(Users.User).filter(Users.User.email == form.login.data).first() is not None:
             return render_template("register.html", message="Подобный email уже используется.",
                                    current_user=current_user, form=form)
-        if form.password.data != form.confirm_password.data:
-            return render_template("register.html", message="Пароли не совпадают.",
-                                   current_user=current_user,
-                                   form=form)
         user = Users.User()
         user.email = form.login.data
         user.password = generate_password_hash(form.password.data)
