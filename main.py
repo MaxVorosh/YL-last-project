@@ -75,15 +75,18 @@ def accept_deal(deal_id):
         # владельца продукта.
         prod.is_sold = True  # Товар помечается как проданный.
         session.commit()  # Коммит в базу данных.
-        ddeals = current_user.deals.split(';')
-        for ddeal in ddeals:  # Перебор всех сделок владельца.
-            if int(ddeal) == deal.id:  # Если id совпадают.
-                continue  # Пропуск.
-            ddeal = session.query(Deals.Deal).get(int(ddeal))  # Получение сделки.
-            if ddeal.product == prod.id:  # Если объект сделки тот же, что и в закончившемся аукционе
-                session.delete(ddeal)  # Сделка удаляется.
-            current_user.deals = ";".join([i for i in current_user.deals.split(';') if i != ddeal])
-            # Обновление списка сделок.
+        if current_user.deals is not None and current_user.deals != "":
+            ddeals = current_user.deals.split(';')
+            for ddeal in ddeals:  # Перебор всех сделок владельца.
+                if int(ddeal) == deal.id:  # Если id совпадают.
+                    continue  # Пропуск.
+                ddeal = session.query(Deals.Deal).get(int(ddeal))  # Получение сделки.
+                if ddeal.product == prod.id:  # Если объект сделки тот же, что и в закончившемся
+                    # аукционе
+                    session.delete(ddeal)  # Сделка удаляется.
+                current_user.deals = ";".join(
+                    [i for i in current_user.deals.split(';') if i != ddeal])
+                # Обновление списка сделок.
         session.commit()  # Коммит в базу данных.
         auc = session.query(Auctions.Auction).get(prod.id)  # Поиск аукциона по товару.
         if auc is not None:  # Если аукцион по товару существует.
@@ -251,6 +254,12 @@ def close_auction(auc_id):
     session = db_session.create_session()  # Создание сессии.
     auc = session.query(Auctions.Auction).filter(Auctions.Auction.id == auc_id)[0]  # Поиск
     # текущего аукциона.
+    if auc is None:  # Если аукциона нет.
+        return redirect(f"/product/{auc_id}")  # Перенаправление на страницу товара.
+    if auc.history.split(';')[-1] == "0":  # Если нет ставок, или ставки равны 0.
+        session.delete(auc)  # Удаление аукциона.
+        session.commit()  # Коммит в базу данных.
+        return redirect(f"/product/{auc_id}")  # Перенаправление на страницу товара.
     prod = session.query(Products.Product).filter(Products.Product.id == auc.product)[0]  # Поиск
     # текущего продукта.
     last = auc.participants.split(';')[-1]  # Получение ID последнего участника.
@@ -289,18 +298,49 @@ def close_auction(auc_id):
             win.deals = str(deal.id)  # Просто приравнивание.
         # сделки.
         session.delete(auc)  # Удаление аукциона.
-        ddeals = user.deals.split(';')  # Получение всех сделок пльзователя.
-        for ddeal in ddeals:  # Перебор всех сделок владельца.
-            if int(ddeal) == deal.id:  # Если заключенная ранее сделка -- та, которая попалась.
-                continue  # Пропуск.
-            ddeal = session.query(Deals.Deal).get(int(ddeal))  # Получение сделки.
-            if ddeal.product == prod.id:  # Если объект сделки тот же, что и в закончившемся аукционе
-                session.delete(ddeal)  # Сделка удаляется.
-            user.deals = ";".join([i for i in user.deals.split(';') if i != ddeal])
+        if user.deals is not None and user.deals != "":
+            ddeals = user.deals.split(';')  # Получение всех сделок пльзователя.
+            for ddeal in ddeals:  # Перебор всех сделок владельца.
+                if int(ddeal) == deal.id:  # Если заключенная ранее сделка -- та, которая попалась.
+                    continue  # Пропуск.
+                ddeal = session.query(Deals.Deal).get(int(ddeal))  # Получение сделки.
+                if ddeal.product == prod.id:  # Если объект сделки тот же, что и в закончившемся
+                    # аукционе
+                    session.delete(ddeal)  # Сделка удаляется.
+                user.deals = ";".join([i for i in user.deals.split(';') if i != ddeal])
         session.commit()  # Коммит в базу данных.
         return redirect(f"/product/{prod.id}")  # Перенаправление на страницу товара.
     return render_template("close_auction.html", message='', current_user=current_user, form=form,
                            product=prod, money=win_money)  # Страница закрытия аукциона.
+
+
+@app.route("/delete/<int:product_id>")
+def delete(product_id):
+    session = db_session.create_session()  # Создание сессии.
+    curr_product = session.query(Products.Product).filter(Products.Product.id == product_id).first()
+    # Получение текущего товара.
+    if curr_product is None:  # Если товар не найден.
+        return redirect("/search")  # Перенаправление на страницу поиска.
+    if not current_user.is_authenticated or current_user.id != curr_product.owner:  # Если
+        # пользователь не авторизован или не является владельцем.
+        return redirect(f"/product/{product_id}")  # Перенаправление на страницу товара.
+    user = session.query(Users.User).get(current_user.id)  # Получение текущего пользователя.
+    auc = session.query(Auctions.Auction).get(product_id)  # Получение аукциона.
+    if auc is not None:  # Если аукцион существует.
+        session.delete(auc)  # Удаление аукциона.
+    if current_user.deals is not None and current_user.deals != "":
+        ddeals = current_user.deals.split(';')  # Получение всех сделок пльзователя.
+        for ddeal in ddeals:  # Перебор всех сделок владельца.
+            ddeal = session.query(Deals.Deal).get(int(ddeal))  # Получение сделки.
+            if ddeal.product == curr_product.id:  # Если нужный товар.
+                session.delete(ddeal)  # Сделка удаляется.
+            user.deals = ";".join([i for i in user.deals.split(';') if i != ddeal])  # Удаление
+            # сделки у пользователя.
+    session.delete(curr_product)  # Удаление товара.
+    user.products = ";".join([i for i in user.products.split(';') if int(i) != product_id])
+    # Удаление товара у пользователя.
+    session.commit()  # Коммит в базу данных.
+    return redirect("/account")  # Перенаправление на страницу пользователя.
 
 
 @app.route("/edit_profile", methods=["GET", "POST"])
@@ -585,4 +625,4 @@ def search():
 
 if __name__ == "__main__":  # Проверка прямого запуска.
     db_session.global_init("db/database.sqlite")  # Инициализация базы данных.
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))  # Запуск программы.
+    app.run(host="127.0.0.1", port=int(os.environ.get("PORT", 5000)))  # Запуск программы.
