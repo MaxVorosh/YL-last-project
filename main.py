@@ -494,82 +494,94 @@ def product(pr_id):
     # продукта.
     if pr is None:  # Если товар отсутствует.
         return redirect("/search")  # Перенаправление на страницу поиска.
-    owner = session.query(Users.User).get(pr.owner)  #
-    auction = session.query(Auctions.Auction).get(pr_id)
-    if auction is None:
-        auction = -1
+    owner = session.query(Users.User).get(pr.owner)  # Получение владельца.
+    auction = session.query(Auctions.Auction).get(pr_id)  # Получение аукциона.
+    if auction is None:  # Если нет аукциона.
+        auction = -1  # Перевод в обозначение.
     return render_template("product.html", product=pr, owner=owner, current_user=current_user,
-                           auction=auction)
+                           auction=auction)  # Отображение.
 
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
+    """
+    Регистрация.
+    """
     form = RegistrationForm()
     if form.validate_on_submit():
-        if form.name.data == "":
+        if form.name.data == "":  # Проверка ввода имени.
             return render_template("register.html", message="Необходимо ввести имя",
-                                   current_user=current_user, form=form)
-        if form.surname.data == "":
+                                   current_user=current_user, form=form)  # Предупреждение.
+        if form.surname.data == "":  # Проверка ввода фамилии.
             return render_template("register.html", message="Необходимо ввести фамилию", form=form,
-                                   current_user=current_user)
-        if form.login.data == "":
+                                   current_user=current_user)  # Предупреждение.
+        if form.login.data == "":  # Проверка ввода логина.
             return render_template("register.html", message="Необходимо ввести логин (почту)",
-                                   current_user=current_user, form=form)
+                                   current_user=current_user, form=form)  # Предупреждение.
         if form.password.data == "":  # Если введённый пароль пуст.
             return render_template("register.html", message="Необходимо ввести пароль",
                                    form=form, current_user=current_user)  # Перенаправление на
         # страницу с предупреждением.
         if form.password.data != form.confirm_password.data or form.confirm_password.data == "":
+            # Проверка ввода подтверждения и совпадения паролей.
             return render_template("register.html", message="Пароли не совпадают", form=form,
-                                   current_user=current_user)
-        session = db_session.create_session()
-        if form.photo.data:
-            filename = form.photo.data.filename
+                                   current_user=current_user)  # Предупреждение.
+        session = db_session.create_session()  # Создание сессии.
+        if form.photo.data:  # Если получена фотография.
+            filename = form.photo.data.filename  # Получение имени.
             form.photo.data.save(
                 "static/image/users/" + form.login.data + "." + filename.split(".")[-1])
+            # Сохранение фотографии.
         if session.query(Users.User).filter(Users.User.email == form.login.data).first() is not None:
+            # Проверка использования логина.
             return render_template("register.html", message="Подобный email уже используется.",
-                                   current_user=current_user, form=form)
-        user = Users.User()
-        user.email = form.login.data
-        user.password = generate_password_hash(form.password.data)
-        user.name = form.name.data
-        user.surname = form.surname.data
-        user.money = 50.0
-        user.photo = form.photo.data.filename.split(".")[-1] if form.photo.data else ""
-        session.add(user)
-        session.commit()
-        login_user(user)
-        return redirect("/")
+                                   current_user=current_user, form=form)  # Предупреждение.
+        user = Users.User()  # Создание пользователя.
+        user.email = form.login.data  # Установка почты.
+        user.password = generate_password_hash(form.password.data)  # Установка пароля.
+        user.name = form.name.data  # Установка имени.
+        user.surname = form.surname.data  # Установка фамилии.
+        user.money = 50.0  # Установка количества денег.
+        user.photo = form.photo.data.filename.split(".")[-1] if form.photo.data else ""  # Установка
+        # фото.
+        session.add(user)  # Добавление пользователя.
+        session.commit()  # Коммит в базу данных.
+        login_user(user)  # Вход.
+        return redirect("/")  # Предупреждение на главную страницу.
     return render_template("register.html", message="", current_user=current_user, form=form)
 
 
 @app.route("/search", methods=["GET", "POST"])
 def search():
-    form = SearchForm()
-    session = db_session.create_session()
-    if form.search.data and form.product.data:
+    """
+    Поиск товаров.
+    """
+    form = SearchForm()  # Создание формы.
+    session = db_session.create_session()  # Создание сессии.
+    if form.search.data and form.product.data:  # Если введено только название.
         good = session.query(Products.Product).filter(Products.Product.lower.like(
-            f"%{form.product.data.lower()}%"), Products.Product.is_sold == 0)
+            f"%{form.product.data.lower()}%"), Products.Product.is_sold == 0)  # Писк товаров.
         inv = list(
-            map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), good))
+            map(lambda x: (("static\\image\\products\\" + str(x.id) + ".jpg"), x), good))  # Поиск
+        # фотографий.
         return render_template("Search.html", message='', current_user=current_user, form=form,
-                               inventory=inv)
-    if form.submit.data and form.product.data and form.number.data:
-        session = db_session.create_session()
+                               inventory=inv)  # Отображение.
+    if form.submit.data and form.product.data and form.number.data:  # Если введены все поля.
+        session = db_session.create_session()  # Создание сессии.
         good = session.query(Products.Product).filter(Products.Product.lower.like(
-            f"%{form.product.data.lower()}%"), Products.Product.is_sold == 0)
+            f"%{form.product.data.lower()}%"), Products.Product.is_sold == 0)  # Поиск товаров.
         try:
-            return redirect(f"/product/{good[form.number.data - 1].id}")
+            return redirect(f"/product/{good[form.number.data - 1].id}")  # Перенаправление на
+        # страницу товара.
         except Exception as error:
-            print(error)
+            print(error)  # Вывод ошибки.
             return render_template("Search.html", message='Введите действительный номер',
                                    current_user=current_user,
-                                   form=form, inventory=[])
+                                   form=form, inventory=[])  # Предупреждение.
     return render_template("Search.html", message='', current_user=current_user, form=form,
-                           inventory=[])
+                           inventory=[])  # Отображение.
 
 
-if __name__ == "__main__":
-    db_session.global_init("db/database.sqlite")
-    app.run(host="192.168.0.103")
+if __name__ == "__main__":  # Проверка прямого запуска.
+    db_session.global_init("db/database.sqlite")  # Инициализация базы данных.
+    app.run(host="192.168.0.103")  # Запуск программы.
