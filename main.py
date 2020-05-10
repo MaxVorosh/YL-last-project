@@ -6,6 +6,7 @@ from data.forms import DealForm, CloseForm, AcceptForm
 from flask import Flask, render_template, redirect
 from random import choice, randint
 import datetime
+import os
 
 
 def my_hash(s):
@@ -584,4 +585,4 @@ def search():
 
 if __name__ == "__main__":  # Проверка прямого запуска.
     db_session.global_init("db/database.sqlite")  # Инициализация базы данных.
-    app.run(host="192.168.0.103")  # Запуск программы.
+    app.run(host="0.0.0.0". int(os.environ.get("PORT", 5000))  # Запуск программы.
