@@ -16,8 +16,10 @@
     <p>{{ user.email }}</p>
 </div>
 {% if user.photo != "" and user.photo is not none %}
-<div class="card" style="width: 18rem;">
-    <img src="/static/image/users/{{ user.email }}.{{ user.photo }}">
+<div class="form-group">
+    <div class="card" style="width: 18rem;">
+        <img src="/static/image/users/{{ user.email }}.{{ user.photo }}" class="card-img-top">
+    </div>
 </div>
 {% endif %}
 <h2>Предметы</h2>

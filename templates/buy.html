@@ -19,7 +19,9 @@
         {% set id = product.id|string %}
         {% set path = "\\static\\image\\products\\" + id + ".jpg" %}
         <div class="form-group">
-            <img src={{path}} alt="здесь должна была быть картинка, но не нашлась"><br>
+            <div class="card" style="width: 18rem;">
+                <img src={{path}} alt="здесь должна была быть картинка, но не нашлась" class="card-img-top">
+            </div>
         </div>
         <div class="form-group">
             <label for="cost">{{ form.cost.label() }}</label>
