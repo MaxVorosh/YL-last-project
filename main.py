@@ -120,6 +120,8 @@ def account():
         for deal in current_user.deals.split(";")[::-1]:  # Перебор каждой сделки.
             deal = session.query(Deals.Deal).filter(Deals.Deal.id == deal).first()  # Нахождение
             # сделки в базе данных.
+            if deal is None:
+                continue
             curr = session.query(Products.Product).filter(
                 Products.Product.id == deal.product).first()  # Нахождение товара в базе данных.
             title = curr.title  # Название товара.
