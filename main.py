@@ -361,8 +361,6 @@ def edit_product(product_id):
         # пользователь не авторизован или не является владельцем.
         return redirect(f"/product/{product_id}")  # Перенаправление на страницу товара.
     form = AddProductForm()  # Создание формы.
-    form.title.data = curr_product.title
-    form.description.data = curr_product.description
     if form.validate_on_submit():  # При подтверждении.
         if form.photo.data != "" and form.photo.data is not None:
             photo = form.photo.data  # Получение фото из формы.
@@ -373,7 +371,7 @@ def edit_product(product_id):
         session.commit()  # Коммит в базу данных.
         return redirect("/account")  # Переход на страницу пользователя.
     return render_template("AddProduct.html", message="Фотографию загружать необязательно",
-                           current_user=current_user, form=form)
+                           current_user=current_user, form=form, product=curr_product)
 
 
 @app.route("/edit_profile", methods=["GET", "POST"])
@@ -513,6 +511,11 @@ def make_deal(deal_id):
                                    message="Необходимо ввести только число.")  # Предупреждение.
         if cur.money >= cost >= 0:  # Если денег хватает, и введённая сумма больше 0,
             deal = Deals.Deal()  # Создание сделки.
+            deals = session.query(Deals.Deal).all()
+            if len(deals) == 0:
+                deal.id = 1
+            else:
+                deal.id = deals[-1].id + 1
             deal.product = curr_product.id  # Обозначение объекта сделки.
             deal.participants = ';'.join([str(owner.id), str(cur.id)])  # Добавление участников.
             deal.history = str(form.cost.data)  # Добавление истории сделки.
@@ -520,7 +523,8 @@ def make_deal(deal_id):
             cur.money -= cost  # Отчисление денег в залог.
             session.add(deal)  # Добавление сделки.
             owner.deals = ';'.join(owner.deals.split(';') + [
-                str(deal.id)]) if owner.deals else str(deal.id)  # Добавление сделки владельцу.
+                str(deal.id)]) if owner.deals is not None else str(deal.id)  # Добавление сделки
+            # владельцу.
             cur.deals = ';'.join(
                 cur.deals.split(';') + [str(deal.id)]) if cur.deals else str(deal.id)  # Добалвение
             # сделки пользователю.
@@ -658,4 +662,4 @@ def search():
 
 if __name__ == "__main__":  # Проверка прямого запуска.
     db_session.global_init("db/database.sqlite")  # Инициализация базы данных.
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))  # Запуск программы.
+    app.run(host="127.0.0.1", port=int(os.environ.get("PORT", 5000)))  # Запуск программы.

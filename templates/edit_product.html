@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if message != "" %}
+    <div class="alert alert-danger" role="alert">
+        {{ message }}
+    </div>
+{% endif %}
+<h1>Добавление товара</h1>
+<form action="" method="post" novalidate enctype = "multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        <label for="title">{{ form.title.label }}</label>
+        {{ form.title(class="form-control", id="title", value=product.title) }}
+    </div>
+    <div class="form-group">
+        <label for="description">{{ form.description.label }}</label>
+        {{ form.description(class="form-control", id="description", value=product.description)}}
+    </div>
+    <div class="form-group">
+        <label for="photo">{{ form.photo.label }}</label>
+        {{ form.photo(class="form-control-file", id="photo", type="file") }}
+    </div>
+    {{ form.submit(class="btn btn-warning") }}
+</form>
+{% endblock %}
