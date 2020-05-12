@@ -219,7 +219,6 @@ def buy(product_id):
         money = current_user.money  # Получение суммы денег пользователя.
         if not (form.cost.data > money or form.cost.data < cost + 15):  # Если введена корректная
             # сумма.
-            auc.history = ";".join(history + [str(form.cost.data)])  # Дополнение истории аукциона.
             user.money -= form.cost.data  # Отчисление денег в залог за участие.
             try:
                 last_user = session.query(Users.User).filter(
@@ -231,6 +230,7 @@ def buy(product_id):
             auc.participants = ';'.join(
                 [i for i in auc.participants.split(";") + [str(current_user.id)] if i.strip() != ""])
             # Добавление пользователя в участников аукциона.
+            auc.history = ";".join(history + [str(form.cost.data)])  # Дополнение истории аукциона.
             session.commit()  # Коммит в базу данных.
             return redirect(f"/product/{product_id}")  # Перемещение на страницу товара.
         if form.cost.data < cost + 15:  # Если же новая ставка меньше хотябы суммы 15 у.е. и
